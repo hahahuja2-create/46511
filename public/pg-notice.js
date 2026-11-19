@@ -1,5 +1,5 @@
 'use strict';
-const EARN_NOTICE_VERSION = 'velmora-2026-11-v3';
+const EARN_NOTICE_VERSION = 'velmora-2026-11-v4';
 let noticeSaving=false;
 function earnTierTable() {
   return `<div class="earn-tiers"><table><thead><tr><th>${i18n.html('{account} balance', {account:'VIP'})}</th><th>${i18n.html('Daily rate')}</th></tr></thead><tbody>${EARN_TIERS.map(([min,max,rate])=>`<tr class="${S.user&&earnActive()&&earnRatePct()===rate?'is-current':''}"><td dir="ltr">${min.toLocaleString('en-US')} ${max?`– &lt;${max.toLocaleString('en-US')}`:'+'} USDT</td><td dir="ltr">${rate}%</td></tr>`).join('')}</tbody></table></div>`;

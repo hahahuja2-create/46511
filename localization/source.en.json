@@ -599,7 +599,7 @@
   "VIP minimum": "VIP minimum",
   "VIP minimum top-up": "VIP minimum top-up",
   "VIP starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your VIP balance at Claim. Your first Claim is available when you start VIP. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.": "VIP starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your VIP balance at Claim. Your first Claim is available when you start VIP. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.",
-  "VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.": "VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.",
+  "VIP starts at 50 USDT. Add funds to your VIP balance to start claiming.": "VIP starts at 50 USDT. Add funds to your VIP balance to start claiming.",
   "VIP USDT": "VIP USDT",
   "Virtual collectible": "Virtual collectible",
   "Virtual Core reward settlement": "Virtual Core reward settlement",

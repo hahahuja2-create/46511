@@ -170,7 +170,7 @@ const ERRORS = {
   WORKING_WALLET_UNAVAILABLE: 'The working wallet is temporarily unavailable.',
   PAYMENTS_UNAVAILABLE: 'Deposits and withdrawals are temporarily unavailable.',
   DEPOSITS_UNAVAILABLE: 'Deposits are temporarily unavailable. Please try again later.',
-  EARN_MINIMUM_REQUIRED: 'VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.',
+  EARN_MINIMUM_REQUIRED: 'VIP starts at 50 USDT. Add funds to your VIP balance to start claiming.',
   INSUFFICIENT_SPOT_BALANCE: 'Not enough available balance.',
   INSUFFICIENT_ASSET_BALANCE: 'Not enough of this asset.',
   SPOT_LIQUIDITY_UNAVAILABLE: 'Liquidity for this asset is currently insufficient. No funds were deducted.',

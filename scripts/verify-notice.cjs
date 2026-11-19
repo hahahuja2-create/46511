@@ -11,7 +11,7 @@ test('existing users see only a one-time update, with persistent dismissal and c
  browser=await(process.env.PORTGAINY_TEST_BROWSER==='webkit'?webkit:chromium).launch();
  const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
  const login=async()=>{await page.fill('input[name=email]',user.email);await page.fill('input[name=password]',password);await page.click('button[type=submit]');await page.waitForSelector('.shell');};
- await page.goto(base+'/#signin');await login();await page.waitForSelector('.system-notice');assert.match(await page.locator('.system-notice').innerText(),/100 USDT/);assert.equal(await page.locator('.system-notice tbody tr').count(),6);
+ await page.goto(base+'/#signin');await login();await page.waitForSelector('.system-notice');assert.match(await page.locator('.system-notice').innerText(),/50 USDT/);assert.equal(await page.locator('.system-notice tbody tr').count(),6);
  assert.equal(await page.locator('[data-act^="guide-"],[id*="language"]').count(),0);
  await fs.mkdir(path.resolve(__dirname,'../artifacts/earn-notice'),{recursive:true});
  await page.evaluate(()=>document.fonts.ready);

@@ -386,7 +386,7 @@
   "The rate applies to your entire VIP balance at the time of Claim. Below {value0} {value1}, no daily reward is available.": "განაკვეთი ვრცელდება Claim-ის მომენტში თქვენს მთელ VIP ბალანსზე. {value0} {value1}-ზე ნაკლები ბალანსისთვის ყოველდღიური ჯილდო ხელმისაწვდომი არ არის.",
   "Estimate for an unchanged balance and one claim per day. The calculator uses the VIP level for the entered balance. Future rewards are not guaranteed.": "გათვლა ეფუძნება უცვლელ ბალანსს და დღეში ერთ Claim-ს. კალკულატორი იყენებს შეყვანილი ბალანსის შესაბამის დონეს. მომავალი ჯილდოები გარანტირებული არ არის.",
   "Your first Claim is available when you start VIP. Later claims open when the countdown finishes. Missed days do not accumulate.": "პირველი Claim ხელმისაწვდომია VIP-ის დაწყებისთანავე. შემდეგი Claim იხსნება უკუთვლის დასრულებისას. გამოტოვებული დღეები არ გროვდება.",
-  "VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.": "VIP იწყება 100 USDT-იდან. დაამატეთ სახსრები VIP ბალანსზე, რომ Claim-ების მიღება დაიწყოთ.",
+  "VIP starts at 50 USDT. Add funds to your VIP balance to start claiming.": "VIP იწყება 50 USDT-იდან. დაამატეთ სახსრები VIP ბალანსზე, რომ Claim-ების მიღება დაიწყოთ.",
   "Funds in VIP generate your daily reward. Move them back only through a withdrawal review.": "VIP-ში მყოფი თანხა ქმნის თქვენს ყოველდღიურ ჯილდოს. უკან მხოლოდ გატანის განხილვის გავლით გადაიტანთ.",
   "Referral offer": "რეფერალური შეთავაზება",
   "Referral rewards credit your available balance and never reduce your friends’ own rewards.": "რეფერალური ჯილდო ირიცხება თქვენს ხელმისაწვდომ ბალანსზე და თქვენი მეგობრების საკუთარ ჯილდოს არასოდეს ამცირებს.",

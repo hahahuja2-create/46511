@@ -59,7 +59,7 @@ test('profile language uses account preference, survives reload and returns to E
     assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     const notice = await page.evaluate(()=>{const el=document.createElement('div');el.innerHTML=earnNoticeContent();return el.textContent;});
     assert.match(notice,/კეთილი იყოს თქვენი მობრძანება Velmora-ში/);
-    assert.match(notice,/100 USDT/);
+    assert.match(notice,/50 USDT/);
     assert.match(notice,/2% fee/);
     assert.doesNotMatch(notice,/\{(?:minimum|fee|range)\}/);
     await page.evaluate(()=>{S.pay.withdrawals=true;S.pay.mode='tron-watch-only';S.pay.networks=[{id:'fixture',label:'TRC20'}];openSheet(walletSheet('withdraw',['Withdraw','Fixture']));});

@@ -4290,7 +4290,7 @@
       }
     ]
   },
-  "VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.": {
+  "VIP starts at 50 USDT. Add funds to your VIP balance to start claiming.": {
     "locations": [
       "public/pg-core.js:152"
     ],
