@@ -74,7 +74,7 @@ async function accountingJournal(store,users,offset=0){
   if(!Number.isSafeInteger(count)||count<0)throw Error('INVALID_ACCOUNTING_COUNT');
   const records=await store.sql.prepare('SELECT batch,account,delta_units,reason,created_at AS occurred_at FROM journal ORDER BY created_at DESC,batch DESC,account ASC LIMIT 25 OFFSET ?').all(offset);
   const names=new Map(users.map(user=>[user.id,user.email]));
-  const labels={lockedBalance:'Earn',withdrawBalance:'Spot',reservedBalance:'Reserved'};
+  const labels={lockedBalance:'VIP',withdrawBalance:'Available',reservedBalance:'Reserved'};
   return {count,offset,limit,hasMore:offset+records.length<count,entries:records.map(row=>{
     const split=row.account.lastIndexOf(':'),id=row.account.slice(0,split),field=row.account.slice(split+1),delta=BigInt(row.delta_units);
     return {batch:row.batch,account:id==='platform'?'Platform counterparty':names.get(id)||'Account unavailable',balance:labels[field]||'Counterparty',

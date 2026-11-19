@@ -70,11 +70,11 @@ test('right-to-left translations isolate account values and identifiers', async 
 
 test('claim and price alert messages preserve their dynamic values', async () => {
   const i18n = createPortgainyI18n(languages, async () => ({
-    '{amount} USDT added to Spot': 'Spot: {amount} USDT',
+    '{amount} USDT added to your available balance': 'Available: {amount} USDT',
     '{asset} rose above {target} — now {current}': '{asset}: {current} > {target}'
   }));
   await i18n.use('ka');
-  assert.equal(i18n.text('{amount} USDT added to Spot', {amount:'406.20'}), 'Spot: 406.20 USDT');
+  assert.equal(i18n.text('{amount} USDT added to your available balance', {amount:'406.20'}), 'Available: 406.20 USDT');
   assert.equal(i18n.text('{asset} rose above {target} — now {current}', {asset:'BTC', target:'70,000.00', current:'71,200.00'}), 'BTC: 71,200.00 > 70,000.00');
 });
 

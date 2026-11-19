@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const acorn = require('acorn');
 const root = path.resolve(__dirname, '..');
-const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js','pg-forge.js','pg-landing.js','pg-app-phone.js'];
+const files = ['pg-core.js','pg-notice.js','pg-views.js','pg-trade.js','pg-more.js','pg-main.js','pg-forge.js','pg-guest.js','pg-app.js'];
 const messages = new Map();
 const examples = new Map();
 
@@ -52,7 +52,7 @@ function visit(node, file) {
       recordExample(node.arguments[0], node.arguments[1], origin);
     }
     if (callee.type === 'Identifier') {
-      const localizedAlias=(file.endsWith('pg-forge.js')&&callee.name==='text')||(file.endsWith('pg-landing.js')&&callee.name==='lt');
+      const localizedAlias=(file.endsWith('pg-forge.js')&&callee.name==='text')||(file.endsWith('pg-guest.js')&&callee.name==='lt');
       const indexes = {sectionHead:[0],section:[0],entry:[0,2],moreLink:[0],sheetHead:[0,1],emptyState:[1,2],unavailable:[0],toast:[0,2]}[callee.name] || (localizedAlias?[0]:[]);
       for (const index of indexes) collectLiterals(node.arguments[index], origin);
       if (callee.name === 'openSheet' && node.arguments[1]?.type === 'ObjectExpression') {

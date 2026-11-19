@@ -33,7 +33,7 @@ test('profile language uses account preference, survives reload and returns to E
       'Fee ({rate}%)':'საკომისიო ({rate}%)',
       'Wallet address':'საფულის მისამართი',
       'Request withdrawal':'გატანის მოთხოვნა',
-      'Daily {account} rewards: {range}':'დღიური {account} ჯილდო: {range}'
+      'Welcome to {platform}':'კეთილი იყოს თქვენი მობრძანება {platform}-ში'
     };
     await page.route('**/locales/ka.json', route => catalogAvailable
       ? route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(georgianFixture)})
@@ -58,7 +58,7 @@ test('profile language uses account preference, survives reload and returns to E
     assert.equal(await page.locator('.profile-language > span').textContent(),'ენა');
     assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     const notice = await page.evaluate(()=>{const el=document.createElement('div');el.innerHTML=earnNoticeContent();return el.textContent;});
-    assert.match(notice,/დღიური Earn ჯილდო: 8–13%/);
+    assert.match(notice,/კეთილი იყოს თქვენი მობრძანება Velmora-ში/);
     assert.match(notice,/100 USDT/);
     assert.match(notice,/2% fee/);
     assert.doesNotMatch(notice,/\{(?:minimum|fee|range)\}/);
@@ -102,7 +102,7 @@ test('profile language uses account preference, survives reload and returns to E
       assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     }
     await page.locator('.page.profile [data-act="logout"]').click();
-    await page.waitForSelector('.land');
+    await page.waitForSelector('.auth');
     assert.equal(await page.locator('html').getAttribute('lang'),'en');
   } finally {
     if (browser) await browser.close();

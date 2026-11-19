@@ -1,4 +1,4 @@
-// Smoke test for the Portgainy front end: every screen renders without errors or horizontal overflow.
+// Smoke test for the Velmora front end: every screen renders without errors or horizontal overflow.
 const assert = require('node:assert/strict');
 const fs = require('node:fs/promises');
 const os = require('node:os');
@@ -9,7 +9,7 @@ const { chromium, webkit } = require('playwright');
 const root = path.resolve(__dirname, '..');
 
 (async () => {
-  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'portgainy-ui-'));
+  const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'velmora-ui-'));
   const child = spawn(process.execPath, ['server.js'], { cwd: root, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
     env: { ...process.env, NODE_ENV: 'development', HOST: '127.0.0.1', PORT: '0', PUBLIC_ORIGIN: '', TASKMALL_DATA_DIR: dir, TASKMALL_MAINTENANCE_ENABLED: '0',
       TASKMALL_EARN_ENABLED: '1', TASKMALL_SPOT_ENABLED: '1', MYSQL_URL: '', DATABASE_URL: '', TASKMALL_SQLITE: '', TRON_DEPOSITS_ENABLED: '0' } });
@@ -31,11 +31,10 @@ const root = path.resolve(__dirname, '..');
       page.on('pageerror', error => problems.push(`${name}: ${error.message}`));
       page.on('console', m => { if (m.type() === 'error' && !/401|Failed to load resource/.test(m.text())) problems.push(`${name}: ${m.text()}`); });
       await page.goto(base);
-      assert.match(await page.title(), /Portgainy/);
-      await page.waitForSelector('.land');
-      await checkEditableSizes('landing');
-      for (const section of ['features', 'wallet', 'markets', 'security', 'how', 'faq']) assert.ok(await page.locator(`#sec-${section}`).count(), `landing section ${section}`);
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name}/landing: horizontal overflow`);
+      assert.match(await page.title(), /Velmora/);
+      await page.waitForSelector('.auth');
+      assert.equal(await page.locator('.land').count(), 0, 'there is no landing page: guests go straight to sign-in');
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `${name}/sign-in: horizontal overflow`);
       await page.goto(base + '/#signin');
       await page.waitForSelector('.auth');
       if (touch) assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= innerHeight + 1), `${name}: sign-in must fit one screen`);
@@ -50,9 +49,13 @@ const root = path.resolve(__dirname, '..');
       if (await page.locator('[data-act="dismiss-earn-notice"]').count()) {
         await page.locator('[data-act="dismiss-earn-notice"]').first().click();
         await page.waitForFunction(()=>!S.earnNoticeActive);
+        await page.locator('.sheet-backdrop').waitFor({state: 'detached'});
       }
       if (await page.locator('[data-act="close-sheet"]').first().isVisible().catch(() => false)) await page.locator('.sheet [data-act="close-sheet"]').first().click();
-      for (const view of ['home', 'markets', 'trade', 'earn', 'assets', 'referrals', 'profile', 'support', 'about']) {
+      assert.equal(await page.locator('[data-view="markets"], [data-view="trade"], [data-act="open-search"]').count(), 0, 'Markets and Trade are gone from the platform');
+      await page.evaluate(() => { location.hash = 'markets'; });
+      await page.waitForSelector('.shell.view-home');
+      for (const view of ['home', 'earn', 'assets', 'referrals', 'profile', 'support', 'about']) {
         await page.evaluate(v => { location.hash = v; }, view);
         await page.waitForSelector(`.shell.view-${view}`);
         await checkEditableSizes(view);
@@ -60,30 +63,11 @@ const root = path.resolve(__dirname, '..');
           assert.equal(await page.locator('#profile-language').inputValue(), 'en', 'new accounts start in English');
           assert.ok(await page.locator('#profile-language option[value="en"]').count(), 'English is available');
         }
-        if (view === 'markets') {
-          const preserved = await page.evaluate(() => {
-            S.markets = [];
-            const input = document.querySelector('#market-search'); input.focus();
-            acceptMarkets({markets: [{symbol: 'BTCUSDT', base: 'BTC', name: 'Bitcoin', price: 100, change: 1, volume: 1000}], status: 'live'});
-            const kept = document.activeElement === input && document.querySelector('#market-search') === input;
-            input.blur(); updateTimers();
-            return {kept, updated: Boolean(document.querySelector('[data-symbol="BTCUSDT"]'))};
-          });
-          assert.equal(preserved.kept, true, 'first market update preserves the focused field');
-          assert.equal(preserved.updated, true, 'market update appears after editing ends');
-        }
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
         if (overflow > 1) problems.push(`${name}/${view}: horizontal overflow ${overflow}px`);
         const text = await page.locator('#content').innerText();
         if (/undefined|NaN|\[object/.test(text)) problems.push(`${name}/${view}: bad text`);
       }
-      await page.locator('[data-act="open-search"]:visible').first().click();
-      await page.waitForSelector('#global-search');
-      await checkEditableSizes('global-search');
-      await page.locator('#global-search').fill('BTC');
-      assert.equal(await page.locator('#global-search').inputValue(), 'BTC');
-      await page.keyboard.press('Escape');
-      await page.locator('.sheet-backdrop').waitFor({state: 'detached'});
       await page.evaluate(() => {
         S.pay.withdrawals = true; S.pay.mode = 'tron-watch-only';
         S.pay.networks = [{id: 'test1', label: 'Test 1'}, {id: 'test2', label: 'Test 2'}];
@@ -146,15 +130,8 @@ const root = path.resolve(__dirname, '..');
         const nonAdmin = manualAdminDisplay();
         return {home, referrals, profile, unchanged, future, other, nonAdmin};
       });
-      if (touch) {
-        // The phone Home always shows the account's real figures.
-        assert.doesNotMatch(display.home, /4,650\.00|420\.00/);
-      } else {
-        assert.match(display.home, /Earned all-time.*4,650\.00/);
-        assert.match(display.home, /Level 1 . 10%<\/small><b>5<\/b>/);
-        assert.match(display.home, /Level 2 . 5%<\/small><b>12<\/b>/);
-        assert.match(display.home, /420\.00/);
-      }
+      // Home always shows the account's real figures, never the administrator display offsets.
+      assert.doesNotMatch(display.home, /4,650\.00|420\.00/);
       assert.doesNotMatch(display.referrals, /manual display/i);
       assert.doesNotMatch(display.home, /manual display/i);
       assert.match(display.referrals, /5 <small>members/);
@@ -171,5 +148,5 @@ const root = path.resolve(__dirname, '..');
     await browser.close(); child.kill();
   }
   assert.deepEqual(problems, []);
-  console.log('Portgainy UI smoke test passed.');
+  console.log('Velmora UI smoke test passed.');
 })().catch(error => { console.error(error); process.exit(1); });

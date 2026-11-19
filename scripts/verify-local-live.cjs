@@ -66,7 +66,7 @@ test('local gateway preserves login, sessions, requests and streaming on the exi
   assert.match(await stream.text(), /"status":"live"/);
   const logout = await fetch(local + '/api/auth/logout', { method: 'POST', headers: { Origin: local, 'Content-Type': 'application/json' }, body: '{}' });
   assert.match(logout.headers.get('set-cookie'), /Max-Age=0/); assert.doesNotMatch(logout.headers.get('set-cookie'), /Secure/);
-  const page = await fetch(local); assert.match(await page.text(), /<title>Portgainy<\/title>/);
+  const page = await fetch(local); assert.match(await page.text(), /<title>Velmora<\/title>/);
   assert.equal(page.headers.get('strict-transport-security'), null);
   assert.equal((await fetch(local + '/pg-main.js')).status, 200);
   assert.equal((await fetch(local + '/fonts/arcade/manrope.woff2')).status, 200);

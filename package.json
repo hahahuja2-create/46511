@@ -61,7 +61,6 @@
     "test:earn": "node --test scripts/verify-earn.cjs scripts/verify-earn-api.cjs scripts/verify-earn-tiers.cjs scripts/verify-claim-schedule.cjs",
     "preview:design": "node scripts/design-preview.cjs",
     "test:spot": "node --test scripts/verify-spot.cjs",
-    "test:assets": "node --test scripts/verify-assets.cjs",
     "test:forge": "node --test scripts/verify-forge.cjs scripts/verify-forge-api.cjs scripts/verify-forge-deposits.cjs && node scripts/verify-forge-ui.cjs",
     "build:forge": "node scripts/build-forge.cjs",
     "dev:forge": "node scripts/forge-local.cjs",

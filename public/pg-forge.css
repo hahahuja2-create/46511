@@ -1,5 +1,5 @@
 /*
- * Forge in Portgainy's "Arcade Light" language: ink panels with violet and lime glow, pastel tiles,
+ * Forge in Velmora's "Arcade Light" language: ink panels with violet and lime glow, pastel tiles,
  * chunky lime keys, Google Sans Flex type and Chakra Petch HUD labels. All colours come from the
  * shared tokens in pg-ui.css, so the dark theme needs no extra rules here.
  */
@@ -8,15 +8,15 @@
 .forge-page { gap: 14px; }
 .fp-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding: 4px 2px 0; }
 .fp-eyebrow { display: inline-flex; align-items: center; gap: 8px; font: 600 11px/1 var(--hud); letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-3); }
-.fp-eyebrow::before { content: ''; width: 9px; height: 10px; background: var(--lime); clip-path: var(--hex); box-shadow: 0 0 0 2px var(--lime-soft); }
+.fp-eyebrow::before { content: ''; width: 9px; height: 10px; background: var(--accent); clip-path: var(--hex); box-shadow: 0 0 0 2px var(--accent-soft); }
 .fp-page-head h1 { margin-top: 10px; font: 700 28px/1.05 var(--font); letter-spacing: -0.03em; }
 .fp-tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: var(--r-pill); background: var(--surface-2); }
 .fp-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 18px; border-radius: var(--r-pill); color: var(--ink-3); font: 600 13.5px var(--font); white-space: nowrap; transition: background 0.2s, color 0.2s, box-shadow 0.2s; }
 .fp-tabs button:hover { color: var(--ink); }
 .fp-tabs button.is-on { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgb(15 17 21 / 0.1), 0 4px 10px -4px rgb(15 17 21 / 0.2); }
-.fp-tabs em { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--lime); color: var(--lime-ink); font: 700 11px var(--hud); font-style: normal; }
+.fp-tabs em { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--r-pill); background: var(--accent); color: var(--accent-ink); font: 700 11px var(--hud); font-style: normal; }
 
-/* Standard .btn, .btn-lime and .btn-ghost are inherited directly from pg-ui.css. */
+/* Standard .btn, .btn-main and .btn-ghost are inherited directly from pg-ui.css. */
 .fp-text-button { display: inline-flex; align-items: center; gap: 6px; color: var(--violet); font: 600 13.5px var(--font); }
 .fp-text-button:hover { text-decoration: underline; text-underline-offset: 4px; }
 
@@ -55,7 +55,7 @@
 
 /* ---------------------------------------------------------------- stat tiles */
 .fp-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.fp-stat { min-width: 0; padding: 18px; border-radius: var(--r-lg); background: var(--lime-soft); }
+.fp-stat { min-width: 0; padding: 18px; border-radius: var(--r-lg); background: var(--accent-soft); }
 .fp-stat:nth-child(2) { background: var(--violet-soft); } .fp-stat:nth-child(3) { background: var(--cyan-soft); } .fp-stat:nth-child(4) { background: var(--amber-soft); }
 .fp-stat-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; color: var(--ink-2); font: 500 13px var(--font); }
 .fp-stat-icon { display: grid; place-items: center; flex: none; width: 30px; height: 34px; clip-path: var(--hex); background: var(--surface); color: var(--ink); font-size: 13px; }
@@ -64,8 +64,8 @@
 .fp-stat > p { margin-top: 6px; color: var(--ink-2); font-size: 12.5px; opacity: 0.8; }
 
 /* ---------------------------------------------------------------- claim strip */
-.fp-claim-panel { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-lg); background: var(--lime-soft); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--lime-d) 40%, transparent); }
-.fp-claim-panel::before { content: '◆'; display: grid; place-items: center; flex: none; width: 42px; height: 47px; clip-path: var(--hex); background: linear-gradient(160deg, #e2ff7c, var(--lime) 60%, var(--lime-d)); color: var(--lime-ink); font-size: 16px; }
+.fp-claim-panel { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--r-lg); background: var(--accent-soft); box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--accent-d) 40%, transparent); }
+.fp-claim-panel::before { content: '◆'; display: grid; place-items: center; flex: none; width: 42px; height: 47px; clip-path: var(--hex); background: linear-gradient(160deg, #e2ff7c, var(--accent) 60%, var(--accent-d)); color: var(--accent-ink); font-size: 16px; }
 .fp-claim-panel > div { flex: 1; min-width: 0; }
 .fp-claim-panel h3 { font: 700 22px/1.1 var(--font); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
 .fp-claim-panel p { margin-top: 3px; color: var(--ink-2); font-size: 13px; }
@@ -79,7 +79,7 @@
 .fp-filter button.is-on { background: var(--ink); color: var(--bg); box-shadow: none; }
 .fp-card-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 
-.fp-core-card { --tint: var(--lime-soft); --acc: var(--lime-d); min-width: 0; overflow: hidden; border-radius: 28px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); transition: transform 0.3s var(--glide), box-shadow 0.3s; }
+.fp-core-card { --tint: var(--accent-soft); --acc: var(--accent-d); min-width: 0; overflow: hidden; border-radius: 28px; background: var(--surface); box-shadow: inset 0 0 0 1px var(--line), var(--shadow-1); transition: transform 0.3s var(--glide), box-shadow 0.3s; }
 .fp-core-card[data-kind='pulse'] { --tint: var(--violet-soft); --acc: var(--violet); }
 .fp-core-card[data-kind='bolt'] { --tint: var(--amber-soft); --acc: var(--amber); }
 .fp-core-card[data-kind='flux'], .fp-core-card[data-kind='helix'] { --tint: var(--cyan-soft); --acc: var(--cyan); }
@@ -119,7 +119,7 @@
 .fp-panel .fp-footnote { margin-top: 12px; }
 .fp-panel .fp-text-button { margin-top: 16px; }
 .fp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
-.fp-steps b { display: grid; place-items: center; width: 34px; height: 38px; margin-bottom: 10px; clip-path: var(--hex); background: var(--lime); color: var(--lime-ink); font: 700 14px var(--hud); }
+.fp-steps b { display: grid; place-items: center; width: 34px; height: 38px; margin-bottom: 10px; clip-path: var(--hex); background: var(--accent); color: var(--accent-ink); font: 700 14px var(--hud); }
 .fp-steps h4 { margin-bottom: 4px; font: 650 15px var(--font); }
 .fp-steps p { font-size: 12.5px; }
 .fp-schedule { display: grid; gap: 10px; margin-top: 12px; }
@@ -127,7 +127,7 @@
 .fp-schedule span { color: var(--ink-3); }
 .fp-schedule b { font: 650 14px var(--font); }
 .fp-progress { height: 6px; margin: 14px 0 6px; overflow: hidden; border-radius: 6px; background: var(--surface-3); }
-.fp-progress i { display: block; width: var(--progress, 0%); height: 100%; border-radius: 6px; background: var(--lime-d); }
+.fp-progress i { display: block; width: var(--progress, 0%); height: 100%; border-radius: 6px; background: var(--accent-d); }
 .fp-empty { padding: 60px 24px; text-align: center; border-radius: var(--r-lg); background: var(--surface); box-shadow: inset 0 0 0 1.5px var(--line-2); }
 .fp-empty h3 { margin-bottom: 8px; font: 700 22px var(--font); }
 .fp-empty p { margin-bottom: 20px; color: var(--ink-3); }
@@ -138,7 +138,7 @@
 .fp-modal-content .fp-specs { margin: 0; }
 .fp-modal-content .facts { padding: 4px 14px; border-radius: var(--r-md); background: var(--surface-2); }
 .fp-checkbox { display: flex !important; align-items: flex-start; gap: 10px !important; color: var(--ink-2); font-size: 13px !important; line-height: 1.5; }
-.fp-checkbox input { flex: none; width: 20px; height: 20px; margin-top: 1px; accent-color: var(--lime-d); }
+.fp-checkbox input { flex: none; width: 20px; height: 20px; margin-top: 1px; accent-color: var(--accent-d); }
 .fp-warning { padding: 12px 14px; border-radius: var(--r-md); background: var(--amber-soft); color: var(--ink-2); font-size: 12.5px; line-height: 1.55; }
 .fp-amount-row { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line); font-size: 13px; }
 .fp-form-error { min-height: 16px; color: var(--down); font-size: 12.5px; }

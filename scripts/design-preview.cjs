@@ -15,5 +15,5 @@ const child = spawn(process.execPath, ['--env-file-if-exists=.env', 'scripts/loc
 fs.closeSync(stdout); fs.closeSync(stderr);
 child.unref();
 fs.writeFileSync(path.join(out, 'portgainy-local.pid'), String(child.pid));
-console.log(`Portgainy local gateway starting (PID ${child.pid}). Open http://127.0.0.1:4173.`);
+console.log(`Velmora local gateway starting (PID ${child.pid}). Open http://127.0.0.1:4173.`);
 console.log('Uses the existing Railway backend and database. Startup status: artifacts/portgainy-local.stdout.log');

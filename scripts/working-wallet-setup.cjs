@@ -10,7 +10,7 @@ async function main() {
   console.log('No funds will be transferred, no live settings will change, and no secret will be printed.');
   console.log('Choose a private backup password in the masked dialog. Never share it in chat.');
   const password = await maskedBackupPassword('new');
-  const result = await provisionWorkingWallet({ directory: path.join(process.env.LOCALAPPDATA, 'Portgainy', 'working-wallet'), password });
+  const result = await provisionWorkingWallet({ directory: path.join(process.env.LOCALAPPDATA, 'Velmora', 'working-wallet'), password });
   console.log('Working wallet address:', result.address);
   console.log('Password-encrypted recovery file:', result.backup);
   console.log('Copy the encrypted recovery file to separate safe storage; keep its password separately.');

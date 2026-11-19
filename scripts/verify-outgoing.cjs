@@ -111,7 +111,7 @@ test('the 10 USDT minimum is enforced without reserving rejected amounts', async
   assert.equal(app.users[0].reservedBalance, 10);
 });
 
-test('Claim credits Spot without pre-funding; actual payout stays manual until admin confirmation', async t => {
+test('Claim credits Available without pre-funding; actual payout stays manual until admin confirmation', async t => {
   const { ledger, store, app } = await fixture(t);
   const earn = require('../markets/earn'), now = Date.now(), user = app.users[0];
   Object.assign(user, { lockedBalance: 125, withdrawBalance: 0, earnedTotal: 0, createdAt: new Date(now - earn.DAY).toISOString() });

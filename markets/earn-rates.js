@@ -7,7 +7,7 @@ const TIERS = Object.freeze([
   { minimum:2500, maximum:4000, bps:1200 },
   { minimum:4000, maximum:null, bps:1300 }
 ].map(Object.freeze));
-const NOTICE_VERSION = 'earn-tiers-2026-11-v2';
+const NOTICE_VERSION = 'velmora-2026-11-v3';
 function rateBps(balanceUnits) {
   const balance = BigInt(balanceUnits);
   return [...TIERS].reverse().find(t => balance >= BigInt(t.minimum)*1_000_000n)?.bps ?? TIERS[0].bps;

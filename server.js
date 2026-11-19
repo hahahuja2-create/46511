@@ -136,9 +136,9 @@ function money(value) {
 function balanceValue(value) { return usdtAmount(units(value)); }
 
 function displayNameFromEmail(email) {
-  const localPart = String(email || '').split('@')[0] || 'Portgainy player';
+  const localPart = String(email || '').split('@')[0] || 'Velmora player';
   const name = localPart.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 50);
-  return name.length >= 2 ? name : 'Portgainy player';
+  return name.length >= 2 ? name : 'Velmora player';
 }
 
 function makeInviteCode(user) {

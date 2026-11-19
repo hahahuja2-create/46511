@@ -1,11 +1,11 @@
 {
-  "name": "Portgainy",
-  "short_name": "Portgainy",
-  "description": "Trade. Earn. Level up.",
+  "name": "Velmora",
+  "short_name": "Velmora",
+  "description": "VIP levels, referrals and a USDT wallet.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f6f0",
-  "theme_color": "#f6f6f0",
+  "background_color": "#efe8d2",
+  "theme_color": "#efe8d2",
   "id": "/",
   "scope": "/",
   "icons": [

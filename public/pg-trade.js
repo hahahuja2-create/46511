@@ -1,329 +1,13 @@
 'use strict';
 
-/* Portgainy views, part 2: trade, assets, wallet sheets, orders, search and notices. */
-
-/* ----------------------------------------------------------------- trade */
-
-const RANGES = ['1H', '1D', '1W', '1M'];
-
-function holdingOf(base) { return holdings().find(row => row.base === base); }
-
-function tradeAvailable(row) {
-  const T = S.trade;
-  return T.side === 'BUY' ? num(S.user.withdrawBalance) : num(holdingOf(row.base)?.quantity);
-}
-
-function orderCardInner(row) {
-  const T = S.trade, buy = T.side === 'BUY', avail = tradeAvailable(row);
-  return `
-        <div class="seg seg-trade" role="tablist"><button class="${buy ? 'is-on is-buy' : ''}" type="button" data-act="trade-side" data-side="BUY">${i18n.html("Buy")}</button><button class="${!buy ? 'is-on is-sell' : ''}" type="button" data-act="trade-side" data-side="SELL">${i18n.html("Sell")}</button></div>
-        <div class="avail"><span>${i18n.html("Available")}</span><b>${buy ? `${money(avail)} USDT` : `${S.hide ? '••••' : qty(avail)} ${esc(row.base)}`}</b><button class="mini-link" type="button" data-act="wallet-deposit">${icon('plus')}</button></div>
-        <form class="form" data-form="order" novalidate>
-          <label class="field"><span>${i18n.html(buy ? 'Total' : 'Quantity')}</span><div class="control">
-            <input id="order-input" name="value" type="text" inputmode="decimal" autocomplete="off" placeholder="${buy ? '0.00' : '0.00000000'}" value="${esc(T.input)}"><b class="suffix">${buy ? 'USDT' : esc(row.base)}</b></div></label>
-          <div class="pcts">${[25, 50, 75, 100].map(p => `<button type="button" data-act="trade-pct" data-pct="${p}">${p === 100 ? i18n.html('Max') : p + '%'}</button>`).join('')}</div>
-          <div class="est"><span>${i18n.html(buy ? 'You get ≈' : 'You receive ≈')}</span><b id="order-est">—</b></div>
-          <p class="form-msg" id="order-msg" role="alert"></p>
-          <button class="btn btn-lg btn-block ${buy ? 'btn-buy' : 'btn-sell'}" type="submit" ${T.busy ? 'disabled' : ''}>${i18n.html(buy ? 'Buy {asset}' : 'Sell {asset}', {asset:row.base})}</button>
-        </form>
-        <p class="fine">${icon('info')}${i18n.html("Prices follow live Binance quotes; positions are recorded by {value0} and settled in {value1}. No coin custody is implied.", {"value0":"Portgainy","value1":"USDT"})}</p>
-  `;
-}
-
-function tradeView() {
-  const T = S.trade;
-  const row = coinBySymbol(T.symbol);
-  if (!row) {
-    return `<div class="page trade"><header class="page-head"><div><h1>${i18n.html("Trade")}</h1><p>${i18n.html("Spot · {value0}", {"value0":"USDT"})}</p></div>${liveBadge()}</header>${S.markets.length ? emptyState('candles', 'Pair not available', 'Pick another market to continue.', `<button class="btn btn-lime btn-sm" data-act="pick-pair">${i18n.html('Choose market')}</button>`) : `<section class="card">${marketsLoading()}</section>`}</div>`;
-  }
-  const buy = T.side === 'BUY';
-  const avail = tradeAvailable(row);
-  const span = row.high - row.low;
-  const position = span > 0 ? clamp((row.price - row.low) / span * 100, 0, 100) : 50;
-  const fav = S.favorites.includes(row.symbol);
-  const hasAlert = S.alerts.some(a => a.symbol === row.symbol);
-  return `<div class="page trade">
-    <header class="pair-head">
-      <button class="pair-btn" type="button" data-act="pick-pair">${coinMark(row.base, 34)}<span><b>${esc(row.base)}<small>/USDT</small></b><em>${esc(row.name)}</em></span>${icon('chevronDown')}</button>
-      <span class="pair-actions"><button class="icon-btn ${fav ? 'is-on' : ''}" type="button" data-act="toggle-fav" data-symbol="${esc(row.symbol)}" aria-label="${i18n.html("Favorite")}">${icon('star')}</button>
-      <button class="icon-btn ${hasAlert ? 'is-on' : ''}" type="button" data-act="open-alert" aria-label="${i18n.html("Price alert")}">${icon('bellPlus')}</button></span>
-    </header>
-    <div class="trade-grid">
-      <div class="trade-main">
-      <section class="card chart-card">
-        <div class="px-row"><strong class="px-big ${tone(row.change)}" data-px="${esc(row.symbol)}">${price(row.price)}</strong><span class="chg ${tone(row.change)}" data-chg="${esc(row.symbol)}">${pct(row.change)}</span></div>
-        <div class="px-sub">≈ $<span data-px-usd="${esc(row.symbol)}">${price(row.price)}</span> · ${liveBadge()}</div>
-        <div class="stat-row"><span>${i18n.html("{value0} High", {"value0":"24h"})}<b data-hi="${esc(row.symbol)}">${price(row.high)}</b></span><span>${i18n.html("{value0} Low", {"value0":"24h"})}<b data-lo="${esc(row.symbol)}">${price(row.low)}</b></span><span>${i18n.html("{value0} Vol", {"value0":"24h"})}<b>${compact(row.volume)}</b></span></div>
-        <div class="ranges" role="tablist">${RANGES.map(r => `<button class="${T.range === r ? 'is-on' : ''}" type="button" data-act="trade-range" data-range="${r}">${r}</button>`).join('')}</div>
-        <div class="chart-wrap"><canvas id="trade-chart" role="img" aria-label="${i18n.html('{asset} price history', {asset:row.name})}"></canvas><span class="chart-status" id="chart-status">${T.history ? '' : i18n.html('Loading price history…')}</span></div>
-        <div class="range-bar" aria-label="${i18n.html("{value0} hour range", {"value0":"24"})}"><span>${price(row.low)}</span><div><i style="left:${position}%"></i></div><span>${price(row.high)}</span></div>
-      </section>
-      <section class="card tabs-card">${tradeTabs(row)}</section>
-      </div>
-      <div class="trade-side">
-      ${isPhone() ? '' : `<section class="card order-card">${orderCardInner(row)}</section>`}
-      ${snapCard(row)}
-      </div>
-    </div>
-    ${isPhone() ? `<div class="trade-cta"><button class="btn btn-buy btn-lg" type="button" data-act="trade-open" data-side="BUY">${i18n.html('Buy {asset}', { asset: row.base })}</button><button class="btn btn-sell btn-lg" type="button" data-act="trade-open" data-side="SELL">${i18n.html('Sell {asset}', { asset: row.base })}</button></div>` : ''}
-  </div>`;
-}
-
-/* Phones place the order ticket in a bottom sheet opened from the Buy / Sell bar. */
-function openOrderSheet(side) {
-  const row = coinBySymbol(S.trade.symbol);
-  if (!row) return;
-  if (side && side !== S.trade.side) { S.trade.side = side; S.trade.input = ''; }
-  S.orderSheet = true;
-  openSheet(`${sheetHead(`${row.base}/USDT`, i18n.text('Spot · {value0}', { value0: 'USDT' }))}<div class="order-card is-sheet" id="order-sheet-body">${orderCardInner(row)}</div>`, { label: 'Order', focus: false, onClose: () => { S.orderSheet = false; } });
-  updateOrderEstimate();
-}
-
-function refreshOrderSheet() {
-  const row = coinBySymbol(S.trade.symbol), box = document.querySelector('#order-sheet-body');
-  if (!row || !box) return;
-  box.innerHTML = orderCardInner(row);
-  updateOrderEstimate();
-}
-
-function snapCard(row) {
-  const others = sortedMarkets('hot').filter(r => r.symbol !== row.symbol).slice(0, 5);
-  return `<section class="card snap-card"><div class="sec-head"><h2>${i18n.html('Popular markets')}</h2>${moreLink('All', 'markets')}</div><div class="mlist">${others.map(r => marketRow(r)).join('')}</div></section>`;
-}
-
-function tradeTabs(row) {
-  const T = S.trade;
-  const tabs = [['positions', i18n.text('Positions')], ['orders', i18n.text('Orders')], ['alerts', i18n.text('Alerts')], ['info', i18n.text('Info')]];
-  return `<div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="${T.tab === k ? 'is-on' : ''}" type="button" role="tab" data-act="trade-tab" data-tab="${k}">${esc(l)}${k === 'alerts' && S.alerts.length ? `<sup>${S.alerts.length}</sup>` : ''}</button>`).join('')}</div><div id="trade-tab-body">${tradeTabBody(row)}</div>`;
-}
-
-function tradeTabBody(row) {
-  const T = S.trade;
-  if (T.tab === 'positions') return positionsList(true);
-  if (T.tab === 'orders') {
-    const orders = S.portfolio?.orders || [];
-    if (!orders.length) return emptyState('receipt', 'No orders yet', 'Filled orders will be listed here.');
-    return `<ul class="acts">${orders.slice(0, 20).map(o => `<li class="act"><span class="act-ic ${o.side === 'BUY' ? 'earn' : 'withdraw'}">${icon(o.side === 'BUY' ? 'trendUp' : 'trendDown')}</span><span class="act-copy"><b>${i18n.html(o.side === 'BUY' ? 'Bought {asset}' : 'Sold {asset}', {asset:o.base})}</b><small>${qty(o.quantity)} @ ${price(o.price)} · ${esc(dateText(o.filledAt || o.createdAt || o.at))}</small></span><span class="act-amt ${o.side === 'BUY' ? 'down' : 'up'}">${S.hide ? '••••' : `${o.side === 'BUY' ? '-' : '+'}${usd(o.total)}`}<small>USDT</small></span></li>`).join('')}</ul>`;
-  }
-  if (T.tab === 'alerts') {
-    const list = S.alerts;
-    return `<div class="alerts-head"><p>${i18n.html("Alerts fire while {value0} is open.", {"value0":"Portgainy"})}</p><button class="btn btn-ghost btn-sm" type="button" data-act="open-alert">${icon('plus')}${i18n.html("New alert")}</button></div>
-      ${list.length ? `<ul class="acts">${list.map(a => `<li class="act"><span class="act-ic transfer">${icon('bell')}</span><span class="act-copy"><b>${i18n.html(a.dir === 'above' ? '{asset} rises above {price}' : '{asset} falls below {price}', {asset:a.symbol.replace('USDT', ''),price:price(a.price)})}</b><small>${i18n.html('Set {time}', {time:timeAgo(a.created)})}</small></span><button class="icon-btn" type="button" data-act="remove-alert" data-id="${esc(a.id)}" aria-label="${i18n.html("Remove alert")}">${icon('trash')}</button></li>`).join('')}</ul>` : emptyState('bell', 'No price alerts', 'Get notified when a market reaches your target.')}`;
-  }
-  return `<dl class="facts"><div><dt>${i18n.html("Asset")}</dt><dd>${esc(row.name)} (${esc(row.base)})</dd></div><div><dt>${i18n.html("Category")}</dt><dd>${i18n.html(row.category || '—')}</dd></div><div><dt>${i18n.html("Quote")}</dt><dd>USDT</dd></div><div><dt>${i18n.html("{value0} change", {"value0":"24h"})}</dt><dd class="${tone(row.change)}">${pct(row.change)}</dd></div><div><dt>${i18n.html("{value0} volume", {"value0":"24h"})}</dt><dd>${compact(row.volume)} USDT</dd></div><div><dt>${i18n.html("Order size")}</dt><dd>1 – 10,000 USDT</dd></div><div><dt>${i18n.html("Quote validity")}</dt><dd>${i18n.html('{seconds} seconds', {seconds:S.spot?.quoteLifetimeSeconds || 15})}</dd></div><div><dt>${i18n.html("Trading fee")}</dt><dd>${S.spot ? `${(num(S.spot.feeRate) * 100).toFixed(2)}%` : '—'}</dd></div></dl>`;
-}
-
-function positionsList(compactMode = false) {
-  const rows = holdings();
-  if (!rows.length) return emptyState('layers', 'No open positions', S.user?.forgeEnabled?'Use your USDT wallet to open a synthetic market position.':'Buy a coin with your Spot balance and it will show up here.', compactMode ? '' : '<button class="btn btn-lime btn-sm" data-act="goto" data-view="trade">Start trading</button>');
-  return `<ul class="pos">${rows.map(row => {
-    const c = coin(row.base), value = num(row.quantity) * num(c?.price), pnl = value - num(row.cost), p = num(row.cost) > 0 ? pnl / num(row.cost) * 100 : 0;
-    return `<li class="pos-row"><button type="button" data-act="open-trade" data-symbol="${esc(c?.symbol || row.base + 'USDT')}">${coinMark(row.base, 38)}<span class="pos-name"><b>${esc(row.base)}</b><small>${S.hide ? '••••' : qty(row.quantity)}</small></span><span class="pos-val"><b data-pos-val="${esc(row.base)}">${c ? money(value) : '—'}<small> USDT</small></b><small class="${tone(pnl)}" data-pos-pnl="${esc(row.base)}">${c ? (S.hide ? '••••' : `${pnl >= 0 ? '+' : ''}${usd(pnl)} (${pct(p)})`) : '—'}</small></span></button></li>`;
-  }).join('')}</ul>`;
-}
-
-function updateOrderEstimate() {
-  const T = S.trade, row = coinBySymbol(T.symbol), out = document.querySelector('#order-est');
-  if (!row || !out) return;
-  const value = num(T.input);
-  out.textContent = value > 0 ? (T.side === 'BUY' ? `${qty(value / row.price)} ${row.base}` : `${usd(value * row.price)} USDT`) : '—';
-}
-
-async function loadTradeHistory() {
-  const T = S.trade, symbol = T.symbol, range = T.range;
-  T.token = (T.token || 0) + 1;
-  const token = T.token;
-  try {
-    const data = await api(`/api/markets/history?${new URLSearchParams({ symbol, range })}`, { timeout: 16000 });
-    if (token !== T.token || S.view !== 'trade') return;
-    T.history = data;
-    document.querySelector('#chart-status')?.replaceChildren();
-    drawTradeChart();
-  } catch {
-    if (token === T.token) { const el = document.querySelector('#chart-status'); if (el) el.textContent = i18n.text('Price history temporarily unavailable'); }
-  }
-}
-
-function drawTradeChart() {
-  const T = S.trade, canvas = document.querySelector('#trade-chart');
-  T.chart?.destroy(); T.chart = null;
-  if (!canvas || !T.history?.points?.length) return;
-  const points = T.history.points;
-  const rising = points.at(-1).price >= points[0].price;
-  const css = getComputedStyle(document.documentElement), grid = css.getPropertyValue('--line').trim() || 'rgba(0,0,0,.08)', tick = css.getPropertyValue('--ink-3').trim() || '#6e7380';
-  const color = rising ? (css.getPropertyValue('--up').trim() || '#0c9a5c') : (css.getPropertyValue('--down').trim() || '#de3453');
-  const ctx = canvas.getContext('2d');
-  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.clientHeight || 220);
-  gradient.addColorStop(0, rising ? 'rgba(12,154,92,.26)' : 'rgba(222,52,83,.24)');
-  gradient.addColorStop(1, 'rgba(0,0,0,0)');
-  T.chart = new Chart(canvas, {
-    type: 'line',
-    data: { labels: points.map(p => new Date(p.time).toLocaleString('en-US', T.range === '1D' || T.range === '1H' ? { hour: '2-digit', minute: '2-digit', hourCycle: 'h23' } : { month: 'short', day: 'numeric' })), datasets: [{ data: points.map(p => p.price), borderColor: color, backgroundColor: gradient, fill: true, pointRadius: 0, pointHitRadius: 12, borderWidth: 2, tension: 0.18 }] },
-    options: { animation: false, maintainAspectRatio: false, interaction: { intersect: false, mode: 'index' },
-      plugins: { legend: { display: false }, tooltip: { displayColors: false, backgroundColor: '#11121a', borderColor: '#2a2c3a', borderWidth: 1, titleColor: '#a9acb8', bodyColor: '#f6f7fb', cornerRadius: 12, padding: 10, callbacks: { label: item => `${price(item.raw)} USDT` } } },
-      scales: { x: { grid: { display: false }, border: { display: false }, ticks: { color: tick, maxTicksLimit: 4, font: { size: 10 } } }, y: { position: 'right', border: { display: false }, grid: { color: grid }, ticks: { color: '#6c6c68', maxTicksLimit: 4, font: { size: 10 }, callback: v => price(v) } } } }
-  });
-}
-
-/* Order flow: request a quote, review it, then confirm. */
-
-let quote = null;
-let quoteTimer = null;
-let orderUncertain = false;
-
-async function requestQuote(form) {
-  const T = S.trade, row = coinBySymbol(T.symbol), msg = form.querySelector('#order-msg');
-  if (!row || T.busy) return;
-  const value = String(T.input).trim();
-  if (!/^\d+(\.\d+)?$/.test(value) || num(value) <= 0) { msg.textContent = i18n.text(T.side === 'BUY' ? 'Enter the USDT amount you want to spend.' : 'Enter the quantity you want to sell.'); return; }
-  msg.textContent = ''; T.busy = true;
-  const button = form.querySelector('button[type="submit"]'); button.disabled = true;
-  const owner = S.user.id;
-  try {
-    const result = await api('/api/spot/quote', { method: 'POST', body: { symbol: T.symbol, side: T.side, ...(T.side === 'BUY' ? { amount: value } : { quantity: value }) }, timeout: 16000 });
-    if (S.user?.id !== owner) return;
-    quote = result; orderUncertain = false;
-    openQuoteSheet();
-  } catch (error) {
-    msg.textContent = errMsg(error);
-  } finally { T.busy = false; button.disabled = false; }
-}
-
-function openQuoteSheet(note = '') {
-  const q = quote, buy = q.side === 'BUY';
-  openSheet(`${sheetHead(i18n.text(buy ? 'Buy {asset}' : 'Sell {asset}', {asset:q.base}), 'Review your order')}
-    <div class="quote-hero">${coinMark(q.base, 52)}<strong>${qty(q.quantity)} <small>${esc(q.base)}</small></strong><span>${i18n.html(buy ? 'for {amount} {currency}' : 'receive {amount} {currency}', {amount:usd(q.total),currency:'USDT'})}</span></div>
-    <dl class="facts"><div><dt>${i18n.html("Price")}</dt><dd>${price(q.price)} USDT</dd></div><div><dt>${i18n.html("Fee")}</dt><dd>${usd(q.fee)} USDT</dd></div><div><dt>${i18n.html(buy ? 'Total cost' : 'Total received')}</dt><dd><b>${usd(q.total)} USDT</b></dd></div></dl>
-    <p class="quote-timer" data-quote-expiry></p>
-    <p class="form-msg" id="quote-msg" role="alert">${esc(note)}</p>
-    <div class="sheet-actions"><button class="btn btn-ghost" type="button" data-act="close-sheet">${i18n.html("Cancel")}</button><button class="btn ${buy ? 'btn-buy' : 'btn-sell'}" type="button" data-act="confirm-order" data-confirm-order>${i18n.html(orderUncertain ? 'Check order' : 'Confirm')}</button></div>`,
-  { label: 'Confirm order', onClose: () => { clearInterval(quoteTimer); if (!orderUncertain) quote = null; } });
-  clearInterval(quoteTimer);
-  quoteTimer = setInterval(tickQuote, 500); tickQuote();
-}
-
-function tickQuote() {
-  if (!quote) return clearInterval(quoteTimer);
-  const seconds = Math.max(0, Math.ceil((quote.expiresAt - Date.now()) / 1000));
-  const label = document.querySelector('[data-quote-expiry]'), button = document.querySelector('[data-confirm-order]');
-  if (label) label.innerHTML = seconds ? `${icon('clock')}${i18n.rich('Quote valid for {strongStart}{seconds}s{strongEnd}', {seconds})}` : `${icon('clock')}${i18n.html('Quote expired — close and review again')}`;
-  if (button) button.disabled = S.trade.busy || (!seconds && !orderUncertain);
-}
-
-async function confirmOrder() {
-  const T = S.trade;
-  if (!quote || T.busy) return;
-  const owner = S.user.id, id = quote.id, msg = document.querySelector('#quote-msg');
-  T.busy = true; tickQuote();
-  try {
-    const result = await api('/api/spot/orders', { method: 'POST', body: { quoteId: id }, timeout: 16000 });
-    if (S.user?.id !== owner) return;
-    S.user = result.user; S.activities = result.activities; S.portfolio = result.portfolio;
-    orderUncertain = false; quote = null; T.input = '';
-    closeSheet(); render(); toast('Order filled', 'ok', 'Trade complete');
-  } catch (error) {
-    orderUncertain = !error.status;
-    if (msg) msg.textContent = orderUncertain ? i18n.text('No response received. Tap “Check order” to confirm the same order safely.') : errMsg(error);
-    const button = document.querySelector('[data-confirm-order]'); if (button && orderUncertain) button.textContent = i18n.text('Check order');
-  } finally { T.busy = false; tickQuote(); }
-}
-
-function pickPair() {
-  const sheet = openSheet(`${sheetHead('Choose market', 'Spot · USDT')}<div class="search-field"><span>${icon('search')}</span><input id="pair-search" type="search" placeholder="${i18n.html("Search coin")}" autocomplete="off" autofocus></div><div class="mlist sheet-list" id="pair-list"></div>`, { label: 'Choose market' });
-  const fill = text => {
-    const q = text.trim().toLowerCase();
-    const rows = sortedMarkets('hot').filter(r => !q || `${r.base} ${r.name}`.toLowerCase().includes(q));
-    sheet.querySelector('#pair-list').innerHTML = rows.length ? rows.map(r => marketRow(r)).join('') : emptyState('search', 'No match');
-  };
-  fill('');
-  sheet.querySelector('#pair-search').addEventListener('input', event => fill(event.target.value));
-}
-
-/* Price alerts live in the browser and are checked on every live tick. */
-
-function openAlertSheet() {
-  const row = coinBySymbol(S.trade.symbol);
-  if (!row) return;
-  openSheet(`${sheetHead(`${row.base} price alert`, `Current price ${price(row.price)} USDT`)}
-    <form class="form" data-form="alert" novalidate>
-      <div class="seg"><button class="is-on" type="button" data-act="alert-dir" data-dir="above">${i18n.html("Rises above")}</button><button type="button" data-act="alert-dir" data-dir="below">${i18n.html("Falls below")}</button></div>
-      <input type="hidden" name="dir" value="above">
-      <label class="field"><span>${i18n.html("Target price")}</span><div class="control"><input name="price" type="text" inputmode="decimal" placeholder="${esc(price(row.price))}" autofocus><b class="suffix">USDT</b></div></label>
-      <p class="form-msg" id="alert-msg" role="alert"></p>
-      <button class="btn btn-lime btn-lg btn-block" type="submit">${icon('bellPlus')}${i18n.html("Create alert")}</button>
-      <p class="fine">${icon('info')}${i18n.html("Alerts are stored on this device and trigger while {value0} is open.", {"value0":"Portgainy"})}</p>
-    </form>`, { label: 'Price alert' });
-}
-
-function checkAlerts() {
-  if (!S.alerts.length) return;
-  const fired = [];
-  S.alerts = S.alerts.filter(a => {
-    const row = coinBySymbol(a.symbol);
-    if (!row) return true;
-    const hit = a.dir === 'above' ? row.price >= a.price : row.price <= a.price;
-    if (hit) fired.push([a, row]);
-    return !hit;
-  });
-  if (!fired.length) return;
-  store.write('pg_alerts', S.alerts);
-  for (const [a, row] of fired) toast(i18n.text(a.dir === 'above' ? '{asset} rose above {target} — now {current}' : '{asset} fell below {target} — now {current}', {asset:row.base, target:price(a.price), current:price(row.price)}), 'warn', 'Price alert');
-  if (S.view === 'trade') document.querySelector('#trade-tab-body') && (document.querySelector('#trade-tab-body').innerHTML = tradeTabBody(coinBySymbol(S.trade.symbol)));
-}
+/* Velmora views, part 2: wallet, deposit / withdraw / transfer sheets, history export and notifications. */
 
 /* ---------------------------------------------------------------- assets */
 
 function assetsView() {
-  if (isPhone()) return phoneWallet();
-  if(S.user?.forgeEnabled)return PortgainyForge.walletView();
-  const u = S.user, pnl = unrealized();
-  const tabs = [['overview', i18n.text('Overview')], ['spot', i18n.text('Spot')], ['earn', i18n.text('Earn')], ['history', i18n.text('History')]];
-  let body = '';
-  if (S.assetsTab === 'overview') {
-    body = `${allocationCard()}<section class="card">${sectionHead('Balance')}${balanceRows()}</section>`;
-  } else if (S.assetsTab === 'spot') {
-    body = `<section class="card">${sectionHead('Spot account', `<span class="tag">${i18n.html('Trading · Withdraw')}</span>`)}<div class="acct"><div>${usdtMark(40)}<span><b>USDT</b><small>${i18n.html("Available to trade or withdraw")}</small></span></div><strong>${money(u.withdrawBalance)}</strong></div>
-      <div class="btn-row"><button class="btn btn-lime" data-act="wallet-transfer">${icon('transfer')}${i18n.html("Transfer")}</button><button class="btn btn-ghost" data-act="wallet-withdraw">${icon('withdraw')}${i18n.html("Withdraw")}</button><button class="btn btn-ghost" data-act="goto" data-view="trade">${icon('candles')}${i18n.html("Trade")}</button></div>
-      ${num(u.reservedBalance) > 0 ? `<p class="note">${icon('clock')}${i18n.html("Reserved for pending withdrawals:")} <b>${money(u.reservedBalance)} USDT</b></p>` : ''}</section>
-      <section class="card">${sectionHead('Crypto positions', `<span class="${tone(pnl.amount)} tag">${holdings().length ? (S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)}`) : '—'}</span>`)}${positionsList()}</section>`;
-  } else if (S.assetsTab === 'earn') {
-    body = `<section class="card">${sectionHead('Earn account', `<span class="tag">${i18n.html('Daily rewards')}</span>`)}<div class="acct"><div>${usdtMark(40)}<span><b>USDT</b><small>${i18n.html("Principal for daily rewards")}</small></span></div><strong>${money(u.lockedBalance)}</strong></div>
-      <div class="btn-row"><button class="btn btn-lime" data-act="wallet-deposit">${icon('deposit')}${i18n.html("Deposit")}</button><button class="btn btn-ghost" data-act="wallet-transfer">${icon('transfer')}${i18n.html("Move from Spot")}</button><button class="btn btn-ghost" data-act="goto" data-view="earn">${icon('earn')}${i18n.html("Open Earn")}</button></div></section>
-      ${claimStrip()}`;
-  } else {
-    const filters = [['all', i18n.text('All')], ['deposit', i18n.text('Deposits')], ['withdraw', i18n.text('Withdrawals')], ['transfer', i18n.text('Transfers')], ['trades', i18n.text('Trades')], ['rewards', i18n.text('Rewards')]];
-    body = `<section class="card"><div class="sec-head"><h2>${i18n.html("Transactions")}</h2><button class="btn btn-ghost btn-sm" type="button" data-act="export-history" ${S.activities.length ? '' : 'disabled'}>${icon('download')}${i18n.html("CSV")}</button></div>
-      <div class="chips">${filters.map(([k, l]) => `<button class="${S.historyFilter === k ? 'is-on' : ''}" type="button" data-act="history-filter" data-filter="${k}">${esc(l)}</button>`).join('')}</div>
-      <div id="history-body">${activityList(0, S.historyFilter)}</div></section>
-      <section class="card" id="withdraw-status">${sectionHead('Withdrawal requests')}${withdrawalsList()}</section>`;
-  }
-  return `<div class="page assets">
-    <header class="page-head"><div><h1>${i18n.html("Wallet")}</h1><p>${i18n.html("Spot · Earn · Crypto")}</p></div></header>
-    <article class="hero-card is-compact">
-      <div class="hero-top"><span class="hero-label">${i18n.html("Est. total value")}<button class="eye-btn" type="button" data-act="toggle-hide" aria-label="${i18n.html(S.hide ? 'Show balances' : 'Hide balances')}">${icon(S.hide ? 'eyeOff' : 'eye')}</button></span></div>
-      <div class="hero-num"><strong data-total>${S.hide ? '••••••' : usd(totalValue())}</strong><span>USDT</span></div>
-      <div class="hero-sub"><span>≈ $<span data-total-usd>${S.hide ? '••••' : usd(totalValue())}</span></span>${holdings().length ? `<span class="pnl ${tone(pnl.amount)}" data-pnl>${S.hide ? '••••' : `${pnl.amount >= 0 ? '+' : ''}${usd(pnl.amount)} (${pct(pnl.percent)})`}<small>${i18n.html("Unrealized PNL")}</small></span>` : ''}</div>
-      <div class="quick">${[['wallet-deposit', 'deposit', i18n.text('Add Funds')], ['wallet-withdraw', 'withdraw', i18n.text('Send')], ['wallet-transfer', 'transfer', i18n.text('Transfer')], ['goto', 'earn', i18n.text('Earn'), 'earn']].map(([act, glyph, label, view]) => `<button type="button" data-act="${act}" ${view ? `data-view="${view}"` : ''}><span class="quick-ic">${icon(glyph)}</span><span>${esc(label)}</span></button>`).join('')}</div>
-    </article>
-    <div class="tabs" role="tablist">${tabs.map(([k, l]) => `<button class="${S.assetsTab === k ? 'is-on' : ''}" type="button" role="tab" data-act="assets-tab" data-tab="${k}">${esc(l)}</button>`).join('')}</div>
-    ${body}
-  </div>`;
+  return walletPage();
 }
 
-function balanceRows() {
-  const u = S.user;
-  const usdtRows = [
-    [i18n.text('Spot account'), 'Available to trade or withdraw', u.withdrawBalance, `<button class="btn btn-chip" data-act="wallet-transfer">${i18n.html("Transfer")}</button><button class="btn btn-chip" data-act="goto" data-view="trade">${i18n.html("Trade")}</button>`],
-    [i18n.text('Earn account'), 'Principal for daily rewards', u.lockedBalance, `<button class="btn btn-chip" data-act="wallet-deposit">${i18n.html("Deposit")}</button><button class="btn btn-chip" data-act="goto" data-view="earn">${i18n.html('Earn')}</button>`]
-  ].map(([title, sub, value, buttons]) => `<article class="bal"><div class="bal-main">${usdtMark(38)}<span class="bal-name"><b>USDT</b><small>${esc(title)}</small></span><span class="bal-val"><b>${money(value)}</b><small>${S.hide ? '••••' : `${usd(value)} USDT`}</small></span></div><div class="bal-btns">${buttons}</div></article>`);
-  const cryptoRows = holdings().map(row => {
-    const c = coin(row.base), value = num(row.quantity) * num(c?.price), pnl = value - num(row.cost), p = num(row.cost) > 0 ? pnl / num(row.cost) * 100 : 0;
-    return `<article class="bal"><div class="bal-main">${coinMark(row.base, 38)}<span class="bal-name"><b>${esc(row.base)}</b><small>${esc(c?.name || row.base)}</small></span><span class="bal-val"><b>${S.hide ? '••••' : qty(row.quantity)}</b><small>${c ? moneyUsdt(value) : '—'}</small></span></div>
-      <div class="bal-pnl"><span>${i18n.html("Unrealized PNL")}</span><b class="${tone(pnl)}">${S.hide ? '••••' : `${pnl >= 0 ? '+' : ''}${usd(pnl)} USDT (${pct(p)})`}</b></div>
-      <div class="bal-btns"><button class="btn btn-chip" data-act="goto" data-view="earn">${i18n.html('Earn')}</button><button class="btn btn-chip" data-act="open-trade" data-symbol="${esc(c?.symbol || row.base + 'USDT')}">${i18n.html("Trade")}</button></div></article>`;
-  });
-  return `<div class="bals">${[...usdtRows, ...cryptoRows].join('')}</div>`;
-}
 
 function withdrawalsList() {
   const rows = S.wallet.withdrawals;
@@ -339,7 +23,7 @@ function exportHistory() {
   const rows = [['Type', 'Date', 'Amount USDT', 'Status', 'Net USDT', 'Fee USDT', 'TxID'], ...S.activities.map(a => [activityTitle(a), a.at, num(a.amount), a.status || '', a.netAmount ?? '', a.fee ?? '', a.txid || ''])];
   const blob = new Blob(['﻿' + rows.map(r => r.map(quoteCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob), link = document.createElement('a');
-  link.href = url; link.download = 'portgainy-transactions.csv'; link.click();
+  link.href = url; link.download = 'velmora-transactions.csv'; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
@@ -370,7 +54,7 @@ async function openWallet(type) {
   if(S.user?.forgeEnabled && type==='transfer'){go('earn');return;}
   if (!S.user) return;
   const token = ++walletToken;
-  const meta = { deposit: [i18n.text('Add funds'), i18n.text(S.user.forgeEnabled?'Deposit USDT to your wallet':'Deposit USDT to your Earn account')], withdraw: [i18n.text('Send USDT'), i18n.text(S.user.forgeEnabled?'Withdraw from your USDT wallet':'Withdraw from your Spot account')], transfer: [i18n.text('Transfer'), i18n.text('Move USDT from Spot to Earn')] }[type];
+  const meta = { deposit: [i18n.text('Add funds'), i18n.text(S.user.forgeEnabled?'Deposit USDT to your wallet':'Deposit USDT to your VIP account')], withdraw: [i18n.text('Send USDT'), i18n.text(S.user.forgeEnabled?'Withdraw from your USDT wallet':'Withdraw from your available balance')], transfer: [i18n.text('Transfer'), i18n.text('Move USDT from your available balance to VIP')] }[type];
   openSheet(`${sheetHead(meta[0], meta[1])}<div class="sheet-loading"><i class="spinner"></i><span>${i18n.html(type === 'transfer' ? 'Preparing…' : 'Checking payment availability…')}</span></div>`, { label: meta[0] });
   try {
     if (type !== 'transfer') {
@@ -382,7 +66,7 @@ async function openWallet(type) {
     bindWalletSheet(type);
   } catch (error) {
     if (token !== walletToken) return;
-    openSheet(`${sheetHead(meta[0], meta[1])}${emptyState('info', 'Temporarily unavailable', errMsg(error), `<button class="btn btn-lime btn-sm" data-act="retry-wallet" data-type="${type}">${i18n.html("Try again")}</button>`)}`, { label: meta[0] });
+    openSheet(`${sheetHead(meta[0], meta[1])}${emptyState('info', 'Temporarily unavailable', errMsg(error), `<button class="btn btn-main btn-sm" data-act="retry-wallet" data-type="${type}">${i18n.html("Try again")}</button>`)}`, { label: meta[0] });
   }
 }
 
@@ -390,7 +74,7 @@ function maxAmount() { return clamp(num(S.user.withdrawBalance), 0, 100000).toFi
 
 function amountField(type) {
   const min = type === 'withdraw' ? S.pay.minimum : '0.000001';
-  return `<div class="avail"><span>${i18n.html(S.user.forgeEnabled?'Available USDT balance':'Available Spot balance')}</span><b data-wallet-available>${money(S.user.withdrawBalance)} USDT</b></div>
+  return `<div class="avail"><span>${i18n.html(S.user.forgeEnabled?'Available USDT balance':'Available balance')}</span><b data-wallet-available>${S.hide ? '••••••' : usdExact(S.user.withdrawBalance)} USDT</b></div>
     <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input id="wallet-amount" name="amount" type="number" inputmode="decimal" min="${min}" max="100000" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b><button class="max-btn" type="button" data-act="wallet-max">${i18n.html("MAX")}</button></div></label>${type === 'withdraw' ? `<p class="hint" id="withdrawal-minimum">${i18n.html('Minimum withdrawal request: {amount} {currency}.', {amount:S.pay.minimum,currency:'USDT'})}</p>` : ''}`;
 }
 
@@ -402,9 +86,9 @@ function networkSelect() {
 function walletSheet(type, meta) {
   const head = sheetHead(meta[0], meta[1]);
   const depositRule=S.user?.forgeEnabled?`<p class="note">${icon('info')}${i18n.html('Minimum credit: 10 USDT. Smaller confirmed deposits accumulate until the threshold is reached.')}${S.user.pendingDeposit?` ${i18n.html('Awaiting minimum')}: ${money(S.user.pendingDeposit)} USDT`:''}</p>`:'';
-  const unavailable = text => `${head}${emptyState('info', 'Temporarily unavailable', text, `<button class="btn btn-lime btn-sm" data-act="retry-wallet" data-type="${type}">${i18n.html("Try again")}</button>`)}`;
+  const unavailable = text => `${head}${emptyState('info', 'Temporarily unavailable', text, `<button class="btn btn-main btn-sm" data-act="retry-wallet" data-type="${type}">${i18n.html("Try again")}</button>`)}`;
   if (type !== 'transfer' && S.pay.mode === 'production-redirect' && S.pay.origin) {
-    return `${head}<p class="note">${icon('shield')}${i18n.html('For your security, this action opens on our verified payments site.')}</p><a class="btn btn-lime btn-lg btn-block" href="${esc(S.pay.origin)}/?wallet=${type}#wallet" rel="noopener">${i18n.html('Continue securely')}${icon('external')}</a>`;
+    return `${head}<p class="note">${icon('shield')}${i18n.html('For your security, this action opens on our verified payments site.')}</p><a class="btn btn-main btn-lg btn-block" href="${esc(S.pay.origin)}/?wallet=${type}#wallet" rel="noopener">${i18n.html('Continue securely')}${icon('external')}</a>`;
   }
   if (type === 'deposit') {
     if (!S.pay.available) return unavailable('Deposits are temporarily unavailable.');
@@ -412,15 +96,15 @@ function walletSheet(type, meta) {
       const w = S.pay.wallet;
       if (!w) return unavailable('Deposits are temporarily unavailable.');
       return `${head}${depositRule}<div class="dep">
-        <div class="dep-net"><span class="tag tag-lime">USDT</span><span class="tag">TRON · TRC20</span></div>
+        <div class="dep-net"><span class="tag tag-main">USDT</span><span class="tag">TRON · TRC20</span></div>
         <div class="qr"><img class="deposit-qr" src="${esc(w.qr)}" width="180" height="180" alt="${i18n.html('Deposit QR code')}"></div>
         <label class="field"><span>${i18n.html("Deposit address")}</span><div class="control addr"><input id="dep-address" type="text" value="${esc(w.address)}" readonly><button class="max-btn" type="button" data-act="copy-address">${i18n.html("COPY")}</button></div></label>
-        <ul class="steps"><li>${icon('shield')}${i18n.html('Send only {currency} on the {network} network.', {currency:'USDT',network:'TRON (TRC20)'})}</li><li>${icon('clock')}${i18n.html(S.user.forgeEnabled?'Confirmed deposits credit your USDT wallet once the 10 USDT threshold is met.':'Your balance updates automatically after blockchain confirmation.')}</li><li>${icon('earn')}${S.user.forgeEnabled?i18n.html('One USDT wallet for purchases, trading and withdrawals.'):i18n.html('Deposits credit your {account} account.', {account:'Earn'})}</li></ul>
+        <ul class="steps"><li>${icon('shield')}${i18n.html('Send only {currency} on the {network} network.', {currency:'USDT',network:'TRON (TRC20)'})}</li><li>${icon('clock')}${i18n.html(S.user.forgeEnabled?'Confirmed deposits credit your USDT wallet once the 10 USDT threshold is met.':'Your balance updates automatically after blockchain confirmation.')}</li><li>${icon('earn')}${S.user.forgeEnabled?i18n.html('One USDT wallet for purchases, trading and withdrawals.'):i18n.html('Deposits credit your {account} account.', {account:'VIP'})}</li></ul>
         <a class="link-btn" href="${esc(w.explorer)}" target="_blank" rel="noopener noreferrer">${i18n.html('View address on {explorer}', {explorer:'TRONSCAN'})} ${icon('external')}</a></div>`;
     }
     const first = S.pay.networks[0] || { address: '' };
     return `${head}${depositRule}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="deposit" data-type="deposit">${networkSelect()}<label class="field"><span>${i18n.html("Deposit address")}</span><div class="control addr"><input id="dep-address" data-deposit-address type="text" value="${esc(first.address)}" readonly><button class="max-btn" type="button" data-act="copy-address">${i18n.html("COPY")}</button></div></label>
-      <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input name="amount" type="number" min="${S.user.forgeEnabled?10:5}" step="0.01" placeholder="25.00" required><b class="suffix">USDT</b></div></label><p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">${i18n.html(S.user.forgeEnabled?'Add funds':'Add to Earn')}</button></form>`;
+      <label class="field"><span>${i18n.html("Amount")}</span><div class="control"><input name="amount" type="number" min="${S.user.forgeEnabled?10:5}" step="0.01" placeholder="25.00" required><b class="suffix">USDT</b></div></label><p class="form-msg" role="alert"></p><button class="btn btn-main btn-lg btn-block" type="submit">${i18n.html(S.user.forgeEnabled?'Add funds':'Add to VIP balance')}</button></form>`;
   }
   if (type === 'withdraw') {
     if (!S.pay.withdrawals) return unavailable('Withdrawals are temporarily unavailable.');
@@ -430,10 +114,10 @@ function walletSheet(type, meta) {
       <label class="field"><span>${i18n.html("Wallet address")}</span><div class="control">${icon('wallet')}<input name="wallet" type="text" minlength="${strict ? 34 : 12}" maxlength="${strict ? 34 : 120}" placeholder="${i18n.html(strict ? 'TRON (TRC20) address' : 'USDT wallet address')}" autocomplete="off" spellcheck="false" required></div></label>
       ${strict ? `<label class="field"><span>${i18n.html("Confirm account password")}</span><div class="control">${icon('lock')}<input name="password" type="password" autocomplete="current-password" maxlength="128" required></div></label>` : ''}
       <div class="summary"><span>${i18n.html('Fee ({rate}%)', {rate:+(fee * 100).toFixed(2)})}</span><output data-withdraw-fee>0.00 USDT</output><span>${i18n.html("You receive")}</span><output data-withdraw-net>0.00 USDT</output></div>
-      <p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">${i18n.html("Request withdrawal")}</button>
+      <p class="form-msg" role="alert"></p><button class="btn btn-main btn-lg btn-block" type="submit">${i18n.html("Request withdrawal")}</button>
       <p class="fine">${icon('info')}${i18n.html(S.pay.automaticWithdrawals ? 'Withdrawals are processed automatically when funds and network resources are available.' : 'Withdrawals are reviewed before they are sent.')} ${i18n.html('Never share your password or seed phrase with anyone.')}</p></form>`;
   }
-  return `${head}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="transfer" data-type="transfer"><div class="route"><span>${icon('wallet')}Spot</span>${icon('arrow')}<span>${icon('earn')}Earn</span></div>${amountField('transfer')}<p class="form-msg" role="alert"></p><button class="btn btn-lime btn-lg btn-block" type="submit">${i18n.html("Transfer to Earn")}</button><p class="fine">${icon('info')}${i18n.html('Funds in Earn generate your daily reward. Move them back only through a withdrawal review.')}</p></form>`;
+  return `${head}<form class="form modal-wallet-form" data-form="wallet" data-wallet-form="transfer" data-type="transfer"><div class="route"><span>${icon('wallet')}Available</span>${icon('arrow')}<span>${icon('earn')}VIP</span></div>${amountField('transfer')}<p class="form-msg" role="alert"></p><button class="btn btn-main btn-lg btn-block" type="submit">${i18n.html("Transfer to VIP")}</button><p class="fine">${icon('info')}${i18n.html('Funds in VIP generate your daily reward. Move them back only through a withdrawal review.')}</p></form>`;
 }
 
 function bindWalletSheet(type) {
@@ -448,8 +132,8 @@ function bindWalletSheet(type) {
         const cut = (gross * bps + 5000n) / 10000n;
         fee = Number(cut) / 1e6; net = Number(gross - cut) / 1e6;
       }
-      document.querySelector('[data-withdraw-fee]').textContent = `${usd(fee)} USDT`;
-      document.querySelector('[data-withdraw-net]').textContent = `${usd(net)} USDT`;
+      document.querySelector('[data-withdraw-fee]').textContent = `${usdExact(fee)} USDT`;
+      document.querySelector('[data-withdraw-net]').textContent = `${usdExact(net)} USDT`;
     };
     amount.addEventListener('input', update);
     document.querySelector('[data-act="wallet-max"]')?.addEventListener('click', () => setTimeout(update));
@@ -464,7 +148,7 @@ async function submitWallet(form) {
   if (S.busy) return;
   const type = form.dataset.type, data = new FormData(form), msg = form.querySelector('.form-msg'), button = form.querySelector('button[type="submit"]');
   const endpoints = { deposit: '/api/wallet/deposit', withdraw: '/api/wallet/withdraw', transfer: '/api/wallet/transfer' };
-  const done = { deposit: i18n.text(S.user.forgeEnabled?'Deposit added to your USDT wallet':'Deposit added to Earn'), withdraw: i18n.text('Withdrawal requested'), transfer: i18n.text('Transferred to Earn') };
+  const done = { deposit: i18n.text(S.user.forgeEnabled?'Deposit added to your USDT wallet':'Deposit added to VIP balance'), withdraw: i18n.text('Withdrawal requested'), transfer: i18n.text('Transferred to VIP') };
   const amount = data.get('amount');
   if (!(num(amount) > 0)) { msg.textContent = i18n.text('Enter a valid USDT amount.'); return; }
   S.busy = true; button.disabled = true; msg.textContent = '';
@@ -488,21 +172,7 @@ async function submitWallet(form) {
   } finally { S.busy = false; }
 }
 
-/* ------------------------------------------------------- search & notices */
-
-const PAGES = [['home', 'Home', 'home'], ['markets', 'Markets', 'chart'], ['trade', 'Trade', 'candles'], ['earn', 'Earn', 'earn'], ['assets', 'Assets', 'wallet'], ['referrals', 'Referrals', 'users'], ['profile', 'Profile', 'user'], ['support', 'Support', 'headset'], ['about', 'About', 'building']];
-
-function openSearch() {
-  const sheet = openSheet(`<div class="search-field is-large"><span>${icon('search')}</span><input id="global-search" type="search" placeholder="${i18n.html("Search coins, pages…")}" autocomplete="off" autofocus></div><div class="sheet-list" id="global-results"></div>`, { label: 'Search', wide: true });
-  const fill = text => {
-    const q = text.trim().toLocaleLowerCase(i18n.language);
-    const coins = sortedMarkets('hot').filter(r => !q || `${r.base} ${r.name}`.toLocaleLowerCase(i18n.language).includes(q)).slice(0, q ? 12 : 6);
-    const pages = PAGES.filter(p => !q || `${p[1]} ${i18n.text(p[1])}`.toLocaleLowerCase(i18n.language).includes(q));
-    sheet.querySelector('#global-results').innerHTML = `${coins.length ? `<h3 class="mini-title">${i18n.html("Markets")}</h3><div class="mlist">${coins.map(r => marketRow(r)).join('')}</div>` : ''}${pages.length ? `<h3 class="mini-title">${i18n.html("Pages")}</h3><div class="pages-list">${pages.map(([view, label, glyph]) => `<button type="button" data-act="goto" data-view="${view}">${icon(glyph)}<span>${i18n.html(label)}</span>${icon('chevron')}</button>`).join('')}</div>` : ''}${!coins.length && !pages.length ? emptyState('search', 'No results') : ''}`;
-  };
-  fill('');
-  sheet.querySelector('#global-search').addEventListener('input', event => fill(event.target.value));
-}
+/* ----------------------------------------------------------------- notices */
 
 function openNotices() {
   const acts = S.activities.slice(0, 12);

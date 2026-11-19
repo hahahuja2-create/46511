@@ -1,6 +1,6 @@
 'use strict';
 
-/* Portgainy core: state, API client, formatting, icons, router, toasts and sheets. */
+/* Velmora core: state, API client, formatting, icons, router, toasts and sheets. */
 
 const app = document.querySelector('#app');
 const toastRegion = document.querySelector('#toast-region');
@@ -33,15 +33,12 @@ const store = {
 const S = {
   loading: true, user: null, view: 'home', params: [],
   activities: [], team: null, earn: null, referrals: null, portfolio: null, serverOffset: 0,
-  markets: [], marketStatus: 'loading', marketUpdated: null,
   pay: { mode: 'disabled', available: false, withdrawals: false, automaticWithdrawals: false, minimum: 10, networks: [], origin: null, wallet: null },
   hide: store.read('pg_hide', false),
   favorites: store.read('pg_favorites', ['BTCUSDT', 'ETHUSDT', 'BNBUSDT', 'SOLUSDT']),
   alerts: store.read('pg_alerts', []),
   authMode: 'login', referralCode: '', busy: false,
-  marketTab: 'hot', marketCategory: 'all', marketQuery: '',
   assetsTab: 'overview', historyFilter: 'all',
-  trade: { symbol: store.read('pg_last_symbol', 'BTCUSDT'), side: 'BUY', input: '', range: '1D', tab: 'positions', history: null, chart: null, busy: false },
   chat: { messages: [], busy: false },
   admin: null, adminTab: 'accounting', adminFilter: 'pending', adminSearch: '', adminArmed: null, adminDepositOffset: 0, adminJournalOffset: 0,
   wallet: { withdrawals: null, deposits: null }
@@ -72,6 +69,8 @@ function usd(value) {
   if (abs > 0 && abs < 0.01) return nf6.format(n);
   return nf2.format(Math.trunc(n * 100 + (n < 0 ? -1e-6 : 1e-6)) / 100);
 }
+/* Exact amount (up to six decimals): used where a figure becomes a payment, such as the withdrawal form. */
+const usdExact = value => nf6.format(num(value));
 const usdt = value => `${usd(value)} USDT`;
 const money = value => mask(usd(value));
 const moneyUsdt = value => mask(usdt(value));
@@ -129,7 +128,7 @@ const ICONS = {
   logo: 'Boxes', check: 'Check', mail: 'Mail', user: 'UserRound', users: 'UsersRound', lock: 'LockKeyhole',
   eye: 'Eye', eyeOff: 'EyeOff', arrow: 'ArrowRight', arrowUp: 'ArrowUp', arrowDown: 'ArrowDown', home: 'House',
   chart: 'ChartNoAxesCombined', candles: 'ChartCandlestick', wallet: 'Wallet', deposit: 'ArrowDownToLine', withdraw: 'ArrowUpFromLine',
-  transfer: 'ArrowLeftRight', gift: 'Gift', earn: 'Gem', copy: 'Copy', link: 'Link', close: 'X', logout: 'LogOut',
+  transfer: 'ArrowLeftRight', gift: 'Gift', earn: 'Crown', gem: 'Gem', copy: 'Copy', link: 'Link', close: 'X', logout: 'LogOut',
   info: 'Info', search: 'Search', bell: 'Bell', bellPlus: 'BellPlus', headset: 'Headset', chevron: 'ChevronRight', chevronDown: 'ChevronDown',
   shield: 'ShieldCheck', settings: 'Settings2', retry: 'RefreshCw', star: 'Star', flame: 'Flame', trophy: 'Trophy',
   bolt: 'Zap', clock: 'Clock3', download: 'Download', share: 'Share2', qr: 'QrCode', send: 'SendHorizontal', bot: 'Bot',
@@ -146,18 +145,6 @@ function icon(name, cls = '') {
 
 /* ------------------------------------------------------------------ coins */
 
-function coin(base) { return S.markets.find(row => row.base === base); }
-function coinBySymbol(symbol) { return S.markets.find(row => row.symbol === symbol); }
-
-function coinMark(base, size = 36, color) {
-  const src = typeof COIN_LOGOS === 'object' ? COIN_LOGOS[base] : '';
-  const row = coin(base);
-  const tint = color || row?.color || '#5b6270';
-  return src
-    ? `<span class="coin-mark" style="--s:${size}px"><img src="${esc(src)}" width="${size}" height="${size}" alt="" decoding="async" loading="lazy"></span>`
-    : `<span class="coin-mark is-letter" style="--s:${size}px;--tint:${esc(tint)}">${esc(String(base).slice(0, 2))}</span>`;
-}
-
 const usdtMark = (size = 36) => `<span class="coin-mark is-usdt" style="--s:${size}px"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#26a17b"/><path fill="#fff" d="M17.9 17.2v-.001c-.1.008-.62.04-1.78.04-.92 0-1.58-.03-1.81-.04v.001c-3.56-.16-6.22-.78-6.22-1.52 0-.74 2.66-1.36 6.22-1.52v2.42c.23.02.9.06 1.83.06 1.1 0 1.66-.05 1.76-.06v-2.42c3.55.16 6.2.78 6.2 1.52 0 .74-2.65 1.36-6.2 1.52m0-3.29v-2.17h4.95V8.44H9.19v3.3h4.95v2.17c-4.02.18-7.04.98-7.04 1.94 0 .96 3.02 1.76 7.04 1.94v6.95h3.76v-6.95c4.01-.18 7.03-.98 7.03-1.94 0-.96-3.02-1.76-7.03-1.94"/></svg></span>`;
 
 /* ------------------------------------------------------------------- API */
@@ -172,10 +159,10 @@ const ERRORS = {
   AUTH_REQUIRED: 'Your session ended. Please sign in again.',
   INVALID_AMOUNT: 'Enter a valid USDT amount.',
   INVALID_WALLET: 'Enter a valid USDT wallet address.',
-  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Portgainy deposit address.',
+  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Velmora deposit address.',
   INVALID_NETWORK: 'Choose a supported network.',
   INVALID_REFERRAL: 'Invite code was not found.',
-  INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough Spot balance.',
+  INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough available balance.',
   PASSWORD_CONFIRMATION_REQUIRED: 'Your account password is incorrect.',
   OWNER_SWEEP_IN_PROGRESS: 'A transfer is already in progress.',
   OWNER_SWEEP_ALREADY_SIGNED: 'This transfer has already been signed and cannot be cancelled.',
@@ -183,8 +170,8 @@ const ERRORS = {
   WORKING_WALLET_UNAVAILABLE: 'The working wallet is temporarily unavailable.',
   PAYMENTS_UNAVAILABLE: 'Deposits and withdrawals are temporarily unavailable.',
   DEPOSITS_UNAVAILABLE: 'Deposits are temporarily unavailable. Please try again later.',
-  EARN_MINIMUM_REQUIRED: 'Earn starts at 100 USDT. Add funds to your Earn balance to start claiming.',
-  INSUFFICIENT_SPOT_BALANCE: 'Not enough Spot balance.',
+  EARN_MINIMUM_REQUIRED: 'VIP starts at 100 USDT. Add funds to your VIP balance to start claiming.',
+  INSUFFICIENT_SPOT_BALANCE: 'Not enough available balance.',
   INSUFFICIENT_ASSET_BALANCE: 'Not enough of this asset.',
   SPOT_LIQUIDITY_UNAVAILABLE: 'Liquidity for this asset is currently insufficient. No funds were deducted.',
   QUOTE_EXPIRED: 'Quote expired. Review a new order.',
@@ -294,7 +281,7 @@ document.addEventListener('keydown', event => { if (event.key === 'Escape' && sh
 
 const VIEW_ALIASES = { wallet: 'assets', me: 'profile', company: 'about', team: 'referrals', tasks: 'home', vip: 'earn' };
 const PUBLIC_VIEWS = ['about', 'support'];
-const VIEWS = ['home', 'markets', 'trade', 'earn', 'assets', 'referrals', 'profile', 'support', 'about', 'admin', 'signin', 'signup'];
+const VIEWS = ['home', 'earn', 'assets', 'referrals', 'profile', 'support', 'about', 'admin', 'signin', 'signup'];
 
 function parseHash() {
   const [raw, ...params] = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent);
@@ -313,14 +300,11 @@ function route() {
   const { view, params } = parseHash();
   S.view = view || 'home';
   S.params = params;
+  if (!S.user && !PUBLIC_VIEWS.includes(S.view)) S.view = view === 'signup' ? 'signup' : 'signin';
   S.navCount = (S.navCount || 0) + 1;
   if (!S.user && (view === 'signin' || view === 'signup')) S.authMode = view === 'signup' ? 'signup' : 'login';
   if (S.user && (view === 'signin' || view === 'signup')) { S.view = 'home'; history.replaceState(null, '', '#home'); }
   if (S.view === 'admin' && !S.user?.isAdmin) S.view = 'home';
-  if (S.view === 'trade' && params[0] && /^[A-Z0-9]+USDT$/.test(params[0])) {
-    S.trade.symbol = params[0]; store.write('pg_last_symbol', params[0]);
-    S.trade.input = ''; S.trade.history = null;
-  }
   closeSheet(true);
   render();
   window.scrollTo(0, 0);
@@ -330,23 +314,9 @@ window.addEventListener('hashchange', route);
 
 /* -------------------------------------------------------- derived values */
 
-function holdings() { return S.portfolio?.holdings || []; }
-
-function cryptoValue() {
-  return holdings().reduce((sum, row) => sum + num(row.quantity) * num(coin(row.base)?.price), 0);
-}
-
-function cryptoCost() { return holdings().reduce((sum, row) => sum + num(row.cost), 0); }
-
 function totalValue() {
   const user = S.user;
-  return num(user?.lockedBalance) + num(user?.withdrawBalance) + num(user?.reservedBalance) + cryptoValue();
-}
-
-function unrealized() {
-  const value = holdings().reduce((sum, row) => sum + (coin(row.base) ? num(row.quantity) * num(coin(row.base).price) : num(row.cost)), 0);
-  const cost = cryptoCost();
-  return { amount: value - cost, percent: cost > 0 ? (value - cost) / cost * 100 : 0, cost };
+  return num(user?.lockedBalance) + num(user?.withdrawBalance) + num(user?.reservedBalance);
 }
 
 const EARN_MIN_DEFAULT = 100;

@@ -29,7 +29,7 @@ test('accounting separates actual deposits, internal balances, confirmed and man
  assert.equal(report.withdrawals.pending.gross,'30.000000');assert.equal(report.ownerSweeps.confirmed.gross,'12.500000');
  store.save(state,'fixture-opening');
  const journal=await accountingJournal(store,state.users,0);
- assert.ok(journal.count>=5);assert.ok(journal.entries.some(entry=>entry.account==='a@example.invalid'&&entry.balance==='Earn'&&entry.direction==='credit'));
+ assert.ok(journal.count>=5);assert.ok(journal.entries.some(entry=>entry.account==='a@example.invalid'&&entry.balance==='VIP'&&entry.direction==='credit'));
  assert.ok(journal.entries.some(entry=>entry.account==='Platform counterparty'&&entry.direction==='debit'));
  await assert.rejects(accountingJournal(store,state.users,-1),/INVALID_OFFSET/);
 });
