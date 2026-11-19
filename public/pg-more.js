@@ -246,9 +246,11 @@ function adminAccounting(report,wallet) {
       entry('Recorded withdrawal fees',sumExactAmounts(w.chainConfirmed.fee,w.manualConfirmed.fee),'confirmed and manually marked'))}
     ${section('Rewards and adjustments',entry('VIP claims',value(e.earnClaims))+entry('Referral rewards',value(e.referralRewards))+
       entry('Total recorded earned',value(e.totalEarned))+entry('Recorded manual VIP credits',value(e.manualEarnCredits)))}
-    ${section('Working wallet',entry('Available USDT on-chain',wallet?.balance==null?'Unavailable':usdt(wallet.balance))+
+    ${section('Working wallet',entry('Working wallet USDT',wallet?.balance==null?'Unavailable':usdt(wallet.balance))+
       entry('Working wallet TRX',wallet?.workingTrx==null?'Unavailable':`${usd(wallet.workingTrx)} TRX`)+
       (wallet?.fuelAddress && wallet.fuelAddress!==wallet.address ? entry('Fuel wallet TRX',wallet.fuelTrx==null?'Unavailable':`${usd(wallet.fuelTrx)} TRX`) : '')+
+      entry('Treasury USDT',wallet?.treasuryBalance==null?'Unavailable':usdt(wallet.treasuryBalance))+
+      entry('Treasury TRX',wallet?.treasuryTrx==null?'Unavailable':`${usd(wallet.treasuryTrx)} TRX`)+
       entry('Confirmed transfers to owner',value(s.confirmed.gross),i18n.text('{count} transfers',{count:s.confirmed.count}))+
       entry('Owner transfer in progress',value(s.pending.gross),i18n.text('{count} transfers',{count:s.pending.count})))}
     </div>
@@ -275,7 +277,8 @@ function adminWorkingWallet(wallet) {
   const sweepAvailable = wallet.sweepAvailable === true;
   const issue = {TREASURY_USDT_INSUFFICIENT:'The working wallet does not have enough USDT.', TREASURY_TRX_RESERVE_REQUIRED:'The working wallet needs more TRX for network fees.',
     WORKING_WALLET_BUSY:'Waiting for an outgoing withdrawal to confirm.', SIGNED_TRANSACTION_EXPIRED:'The signed transfer expired and needs review.',
-    OWNER_SWEEP_RECEIPT_MISMATCH:'The network receipt needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'The network or storage is temporarily unavailable.'}[wallet.issue];
+    OWNER_SWEEP_RECEIPT_MISMATCH:'The network receipt needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'The network or storage is temporarily unavailable.',
+    WORKING_WALLET_SIGNER_UNAVAILABLE:'Working wallet transfer signing is not configured.'}[wallet.issue];
   const payoutIssue = {TREASURY_USDT_INSUFFICIENT:'Automatic withdrawals are waiting for USDT.', TREASURY_TRX_RESERVE_REQUIRED:'Automatic withdrawals are waiting for TRX.',
     WORKING_WALLET_BUSY:'Automatic withdrawals are waiting for another outgoing transfer.', SIGNED_TRANSACTION_EXPIRED:'A signed withdrawal expired and needs review.',
     PAYOUT_INTENT_EXPIRED_REVIEW_REQUIRED:'A withdrawal needs review before it can continue.', NETWORK_OR_STORAGE_UNAVAILABLE:'Withdrawal processing is temporarily unavailable.',
@@ -284,19 +287,22 @@ function adminWorkingWallet(wallet) {
     DAILY_SPENDING_LIMIT_REACHED:'The daily collection fee budget has been reached.', USDT_BALANCE_NOT_YET_AVAILABLE:'A deposit is waiting for its confirmed balance.',
     SIGNED_TRANSACTION_EXPIRED:'A signed collection needs review.', PAUSED_FOR_REVIEW:'Deposit collection needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'Deposit collection is temporarily unavailable.'}[wallet.collectionIssue];
   return `<section class="card">${sectionHead('Working wallet')}
-    <dl class="facts"><div><dt>${i18n.html("Balance")}</dt><dd>${wallet.balance == null ? i18n.html('Unavailable') : `${money(wallet.balance)} USDT`}</dd></div>
-      <div><dt>${i18n.html("Working wallet {value0}", {"value0":"TRX"})}</dt><dd>${wallet.workingTrx == null ? i18n.html('Unavailable') : `${money(wallet.workingTrx)} TRX`}</dd></div>
+    <dl class="facts"><div><dt>${i18n.html("Working wallet USDT")}</dt><dd>${wallet.balance == null ? i18n.html('Unavailable') : `${money(wallet.balance)} USDT`}</dd></div>
+      <div><dt>${i18n.html(wallet.fuelAddress===wallet.address ? "Working / fuel wallet TRX" : "Working wallet TRX")}</dt><dd>${wallet.workingTrx == null ? i18n.html('Unavailable') : `${money(wallet.workingTrx)} TRX`}</dd></div>
       ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>${i18n.html("Fuel wallet {value0}", {"value0":"TRX"})}</dt><dd>${wallet.fuelTrx == null ? i18n.html('Unavailable') : `${money(wallet.fuelTrx)} TRX`}</dd></div>` : ''}
+      <div><dt>${i18n.html("Treasury USDT")}</dt><dd>${wallet.treasuryBalance == null ? i18n.html('Unavailable') : `${money(wallet.treasuryBalance)} USDT`}</dd></div>
+      <div><dt>${i18n.html("Treasury TRX")}</dt><dd>${wallet.treasuryTrx == null ? i18n.html('Unavailable') : `${money(wallet.treasuryTrx)} TRX`}</dd></div>
       <div><dt>${i18n.html("Working address")}</dt><dd><code>${esc(wallet.address)}</code></dd></div>
-      ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>${i18n.html("Fuel address")}</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
-      <div><dt>${i18n.html("Send to your treasury")}</dt><dd><code>${wallet.destination ? esc(wallet.destination) : i18n.html('Unavailable')}</code></dd></div></dl>
+      ${wallet.fuelAddress ? `<div><dt>${i18n.html("Fuel address")}</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
+      <div><dt>${i18n.html("Treasury address")}</dt><dd><code>${wallet.destination ? esc(wallet.destination) : i18n.html('Unavailable')}</code></dd></div></dl>
     ${sweepAvailable ? `<p class="note">${icon('info')}${i18n.html("Funds stay here until you request a transfer. Keep enough {value0} and {value1} available for customer withdrawals.", {"value0":"USDT","value1":"TRX"})}</p>` : ''}
+    ${!sweepAvailable && !pending && issue ? `<p class="note">${icon('info')}${i18n.html(issue)}</p>` : ''}
     ${payoutIssue ? `<p class="note">${icon('info')}${i18n.html(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${i18n.html(collectionIssue)}</p>` : ''}
     ${pending && issue ? `<p class="note">${icon('info')}${i18n.html(issue)}</p>` : ''}
     ${!pending && wallet.recent ? `<p class="note">Last transfer: ${money(wallet.recent.amount)} USDT · ${esc(wallet.recent.status)}${/^[a-f0-9]{64}$/.test(wallet.recent.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${wallet.recent.txid}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>` : ''}
     ${!sweepAvailable ? '' : pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>
       ${pending.status === 'planned' ? `<form class="form" data-form="owner-sweep-cancel" data-id="${esc(pending.id)}"><label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${i18n.html("Cancel pending transfer")}</button></form>` : ''}`
-      : `<form class="form" data-form="owner-sweep"><label class="field"><span>${i18n.html("Amount to send")}</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
+      : `<form class="form" data-form="owner-sweep"><label class="field"><span>${i18n.html("Amount to send")}</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" max="${esc(wallet.balance)}" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
         <label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p>
         <button class="btn btn-main" type="submit">${i18n.html("Send to my treasury")}</button></form>`}</section>`;
 }
