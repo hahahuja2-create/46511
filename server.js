@@ -849,14 +849,24 @@ async function handleApi(req, res, url) {
     if (!isAdmin(user)) return json(res, 403, { error: 'ADMIN_REQUIRED' });
     const users = new Map(db.users.map(item => [item.id, item]));
     if (req.method === 'GET' && url.pathname === '/api/admin/working-wallet') {
-      if (!ownerSweeps) return json(res, 503, {error:'WORKING_WALLET_UNAVAILABLE'});
-      const pending = await ownerSweeps.pendingInside();
-      const recent = await ownerSweeps.latestInside();
-      return json(res, 200, {address:TREASURY, destination:ownerSweeps.destination,
-        balance:ownerSweeps.balanceUnits == null ? null : usdtAmount(ownerSweeps.balanceUnits), balanceAt:ownerSweeps.balanceAt || null,
-        workingTrx:ownerSweeps.trxSun == null ? null : Number(ownerSweeps.trxSun)/1_000_000,
-        fuelAddress:ownerSweeps.fuelAddress || null, fuelTrx:ownerSweeps.fuelSun == null ? null : Number(ownerSweeps.fuelSun)/1_000_000,
-        issue:ownerSweeps.lastIssue || null,
+      if (!depositWatcher?.client || !depositWatcher.ready()) return json(res, 503, {error:'WORKING_WALLET_UNAVAILABLE'});
+      const { tokenBalance, trxBalance } = require('./payments/transactions');
+      const fuelAddress = ownerSweeps?.fuelAddress || process.env.TRON_FUEL_ADDRESS || null;
+      const [tokenResult, trxResult, fuelResult] = await Promise.allSettled([
+        tokenBalance(depositWatcher.client, TREASURY),
+        trxBalance(depositWatcher.client, TREASURY),
+        fuelAddress ? trxBalance(depositWatcher.client, fuelAddress) : Promise.resolve(null)
+      ]);
+      const pending = ownerSweeps ? await ownerSweeps.pendingInside() : null;
+      const recent = ownerSweeps ? await ownerSweeps.latestInside() : null;
+      const balanceReady = tokenResult.status === 'fulfilled' && trxResult.status === 'fulfilled'
+        && (!fuelAddress || fuelResult.status === 'fulfilled');
+      return json(res, 200, {address:TREASURY, destination:ownerSweeps?.destination || process.env.TRON_OWNER_TREASURY_ADDRESS || null,
+        balance:tokenResult.status === 'fulfilled' ? usdtAmount(tokenResult.value) : null, balanceAt:balanceReady ? Date.now() : null,
+        workingTrx:trxResult.status === 'fulfilled' ? Number(trxResult.value)/1_000_000 : null,
+        fuelAddress, fuelTrx:fuelAddress && fuelResult.status === 'fulfilled' ? Number(fuelResult.value)/1_000_000 : null,
+        sweepAvailable:Boolean(ownerSweeps && depositWatcher.ready()),
+        issue:ownerSweeps?.lastIssue || (!balanceReady ? 'NETWORK_OR_STORAGE_UNAVAILABLE' : null),
         payoutIssue:automaticPayouts?.lastIssue || null, collectionIssue:automaticCollections?.lastIssue || null,
         pending:pending ? {id:pending.id,amount:usdtAmount(pending.amount_units),status:pending.status,txid:pending.txid} : null,
         recent:recent ? {id:recent.id,amount:usdtAmount(recent.amount_units),status:recent.status,txid:recent.txid} : null});

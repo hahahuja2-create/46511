@@ -272,6 +272,7 @@ function adminJournal(journal) {
 
 function adminWorkingWallet(wallet) {
   const pending = wallet.pending;
+  const sweepAvailable = wallet.sweepAvailable === true;
   const issue = {TREASURY_USDT_INSUFFICIENT:'The working wallet does not have enough USDT.', TREASURY_TRX_RESERVE_REQUIRED:'The working wallet needs more TRX for network fees.',
     WORKING_WALLET_BUSY:'Waiting for an outgoing withdrawal to confirm.', SIGNED_TRANSACTION_EXPIRED:'The signed transfer expired and needs review.',
     OWNER_SWEEP_RECEIPT_MISMATCH:'The network receipt needs review.', NETWORK_OR_STORAGE_UNAVAILABLE:'The network or storage is temporarily unavailable.'}[wallet.issue];
@@ -288,12 +289,12 @@ function adminWorkingWallet(wallet) {
       ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>${i18n.html("Fuel wallet {value0}", {"value0":"TRX"})}</dt><dd>${wallet.fuelTrx == null ? i18n.html('Unavailable') : `${money(wallet.fuelTrx)} TRX`}</dd></div>` : ''}
       <div><dt>${i18n.html("Working address")}</dt><dd><code>${esc(wallet.address)}</code></dd></div>
       ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>${i18n.html("Fuel address")}</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
-      <div><dt>${i18n.html("Send to your treasury")}</dt><dd><code>${esc(wallet.destination)}</code></dd></div></dl>
+      <div><dt>${i18n.html("Send to your treasury")}</dt><dd><code>${wallet.destination ? esc(wallet.destination) : i18n.html('Unavailable')}</code></dd></div></dl>
     <p class="note">${icon('info')}${i18n.html("Funds stay here until you request a transfer. Keep enough {value0} and {value1} available for customer withdrawals.", {"value0":"USDT","value1":"TRX"})}</p>
     ${payoutIssue ? `<p class="note">${icon('info')}${i18n.html(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${i18n.html(collectionIssue)}</p>` : ''}
     ${pending && issue ? `<p class="note">${icon('info')}${i18n.html(issue)}</p>` : ''}
     ${!pending && wallet.recent ? `<p class="note">Last transfer: ${money(wallet.recent.amount)} USDT · ${esc(wallet.recent.status)}${/^[a-f0-9]{64}$/.test(wallet.recent.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${wallet.recent.txid}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>` : ''}
-    ${pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>
+    ${!sweepAvailable ? '' : pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>
       ${pending.status === 'planned' ? `<form class="form" data-form="owner-sweep-cancel" data-id="${esc(pending.id)}"><label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${i18n.html("Cancel pending transfer")}</button></form>` : ''}`
       : `<form class="form" data-form="owner-sweep"><label class="field"><span>${i18n.html("Amount to send")}</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
         <label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p>
