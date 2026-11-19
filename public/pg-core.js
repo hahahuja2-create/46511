@@ -167,6 +167,8 @@ const ERRORS = {
   OWNER_SWEEP_IN_PROGRESS: 'A transfer is already in progress.',
   OWNER_SWEEP_ALREADY_SIGNED: 'This transfer has already been signed and cannot be cancelled.',
   OWNER_SWEEP_DISABLED: 'Transfers are temporarily unavailable.',
+  TREASURY_USDT_INSUFFICIENT: 'The working wallet does not have enough USDT.',
+  TREASURY_TRX_RESERVE_REQUIRED: 'The working wallet needs more TRX for network fees.',
   WORKING_WALLET_UNAVAILABLE: 'The working wallet is temporarily unavailable.',
   PAYMENTS_UNAVAILABLE: 'Deposits and withdrawals are temporarily unavailable.',
   DEPOSITS_UNAVAILABLE: 'Deposits are temporarily unavailable. Please try again later.',

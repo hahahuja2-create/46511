@@ -300,11 +300,11 @@ function adminWorkingWallet(wallet) {
     ${payoutIssue ? `<p class="note">${icon('info')}${i18n.html(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${i18n.html(collectionIssue)}</p>` : ''}
     ${pending && issue ? `<p class="note">${icon('info')}${i18n.html(issue)}</p>` : ''}
     ${!pending && wallet.recent ? `<p class="note">Last transfer: ${money(wallet.recent.amount)} USDT · ${esc(wallet.recent.status)}${/^[a-f0-9]{64}$/.test(wallet.recent.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${wallet.recent.txid}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>` : ''}
-    ${!sweepAvailable ? '' : pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>
+    ${!wallet.sweepConfigured ? '' : pending ? `<p class="note">Transfer ${money(pending.amount)} USDT · ${esc(pending.status)}${pending.txid ? ` · <a href="https://tronscan.org/#/transaction/${esc(pending.txid)}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>
       ${pending.status === 'planned' ? `<form class="form" data-form="owner-sweep-cancel" data-id="${esc(pending.id)}"><label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${i18n.html("Cancel pending transfer")}</button></form>` : ''}`
-      : `<form class="form" data-form="owner-sweep"><label class="field"><span>${i18n.html("Amount to send")}</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" max="${esc(wallet.balance)}" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
+      : `<form class="form" data-form="owner-sweep"><label class="field"><span>${i18n.html("Amount to send")}</span><div class="control"><input name="amount" type="number" inputmode="decimal" min="0.000001" step="0.000001" placeholder="0.00" required><b class="suffix">USDT</b></div></label>
         <label class="field"><span>${i18n.html("Account password")}</span><div class="control"><input name="password" type="password" autocomplete="current-password" required></div></label><p class="form-msg" role="alert"></p>
-        <button class="btn btn-main" type="submit">${i18n.html("Send to my treasury")}</button></form>`}</section>`;
+        <button class="btn btn-main" type="submit" ${sweepAvailable ? '' : 'disabled'}>${i18n.html("Send to my treasury")}</button></form>`}</section>`;
 }
 
 function adminDepositList(info) {

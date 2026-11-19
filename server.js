@@ -880,6 +880,7 @@ async function handleApi(req, res, url) {
         treasuryTrx:treasuryTrxResult.status === 'fulfilled' ? Number(treasuryTrxResult.value)/1_000_000 : null,
         fuelAddress, fuelTrx:fuelAddress === workingAddress && trxResult.status === 'fulfilled' ? Number(trxResult.value)/1_000_000
           : fuelAddress && fuelResult.status === 'fulfilled' ? Number(fuelResult.value)/1_000_000 : null,
+        sweepConfigured:Boolean(ownerSweeps && depositWatcher.ready()),
         sweepAvailable:Boolean(ownerSweeps && balanceReady && workingUsdt > 0n && feeLimit != null && workingSun >= feeLimit + 1_000_000n),
         issue,
         payoutIssue:automaticPayouts?.lastIssue || null, collectionIssue:automaticCollections?.lastIssue || null,
@@ -893,6 +894,12 @@ async function handleApi(req, res, url) {
       if (!(await verifyPassword(body.password,user))) return json(res, 403, {error:'PASSWORD_CONFIRMATION_REQUIRED'});
       const value=parseExactUsdt(body.amount,0,100_000_000);
       if (!value) return json(res, 400, {error:'INVALID_AMOUNT'});
+      const { tokenBalance, trxBalance } = require('./payments/transactions');
+      const [workingUsdt, workingSun] = await Promise.all([
+        tokenBalance(depositWatcher.client, ownerSweeps.source), trxBalance(depositWatcher.client, ownerSweeps.source)
+      ]);
+      if (workingUsdt < units(value)) return json(res, 400, {error:'TREASURY_USDT_INSUFFICIENT'});
+      if (workingSun < BigInt(ownerSweeps.feeLimit) + 1_000_000n) return json(res, 400, {error:'TREASURY_TRX_RESERVE_REQUIRED'});
       const record=await ownerSweeps.requestInside({key:body.requestKey,amount:value},user.id);
       return json(res, 201, {sweep:{id:record.id,amount:usdtAmount(record.amount_units),status:record.status,txid:record.txid}});
     }
