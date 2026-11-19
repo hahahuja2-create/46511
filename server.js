@@ -861,7 +861,7 @@ async function handleApi(req, res, url) {
       const recent = ownerSweeps ? await ownerSweeps.latestInside() : null;
       const balanceReady = tokenResult.status === 'fulfilled' && trxResult.status === 'fulfilled'
         && (!fuelAddress || fuelResult.status === 'fulfilled');
-      return json(res, 200, {address:TREASURY, destination:ownerSweeps?.destination || process.env.TRON_OWNER_TREASURY_ADDRESS || null,
+      return json(res, 200, {address:TREASURY, destination:ownerSweeps?.destination || process.env.TRON_OWNER_TREASURY_ADDRESS || TREASURY,
         balance:tokenResult.status === 'fulfilled' ? usdtAmount(tokenResult.value) : null, balanceAt:balanceReady ? Date.now() : null,
         workingTrx:trxResult.status === 'fulfilled' ? Number(trxResult.value)/1_000_000 : null,
         fuelAddress, fuelTrx:fuelAddress && fuelResult.status === 'fulfilled' ? Number(fuelResult.value)/1_000_000 : null,

@@ -290,7 +290,7 @@ function adminWorkingWallet(wallet) {
       <div><dt>${i18n.html("Working address")}</dt><dd><code>${esc(wallet.address)}</code></dd></div>
       ${wallet.fuelAddress && wallet.fuelAddress!==wallet.address ? `<div><dt>${i18n.html("Fuel address")}</dt><dd><code>${esc(wallet.fuelAddress)}</code></dd></div>` : ''}
       <div><dt>${i18n.html("Send to your treasury")}</dt><dd><code>${wallet.destination ? esc(wallet.destination) : i18n.html('Unavailable')}</code></dd></div></dl>
-    <p class="note">${icon('info')}${i18n.html("Funds stay here until you request a transfer. Keep enough {value0} and {value1} available for customer withdrawals.", {"value0":"USDT","value1":"TRX"})}</p>
+    ${sweepAvailable ? `<p class="note">${icon('info')}${i18n.html("Funds stay here until you request a transfer. Keep enough {value0} and {value1} available for customer withdrawals.", {"value0":"USDT","value1":"TRX"})}</p>` : ''}
     ${payoutIssue ? `<p class="note">${icon('info')}${i18n.html(payoutIssue)}</p>` : ''}${collectionIssue ? `<p class="note">${icon('info')}${i18n.html(collectionIssue)}</p>` : ''}
     ${pending && issue ? `<p class="note">${icon('info')}${i18n.html(issue)}</p>` : ''}
     ${!pending && wallet.recent ? `<p class="note">Last transfer: ${money(wallet.recent.amount)} USDT · ${esc(wallet.recent.status)}${/^[a-f0-9]{64}$/.test(wallet.recent.txid || '') ? ` · <a href="https://tronscan.org/#/transaction/${wallet.recent.txid}" target="_blank" rel="noopener noreferrer">${i18n.html("View transaction")}</a>` : ''}</p>` : ''}
