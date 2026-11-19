@@ -741,7 +741,7 @@ async function handleApi(req, res, url) {
       const fields=['userId','expectedEarn','expectedEarned','targetEarn','targetDisplayEarned','operationId'];
       if (Object.keys(body).length !== fields.length || fields.some(key => typeof body[key] !== 'string')) return json(res,400,{error:'INVALID_ADJUSTMENT'});
       const digest=crypto.createHash('sha256').update(JSON.stringify(fields.map(key=>body[key]))).digest('hex');
-      const allowed=process.env.NODE_ENV === 'test' ? process.env.TASKMALL_TEST_ADJUSTMENT_DIGEST : '37f3c4a91776a41c45c851715d44d198b0fa579353aae485b102c7f191901c4b';
+      const allowed=process.env.NODE_ENV === 'test' ? process.env.TASKMALL_TEST_ADJUSTMENT_DIGEST : 'cc06adfec40fbfdc50c7fee18e1cf83b4923bf636bbc5470b00f0862985839ae';
       if (!allowed || digest !== allowed) return json(res,403,{error:'ADJUSTMENT_NOT_AUTHORIZED'});
       const transaction=(paymentStore.transactionAsync || paymentStore.transaction).bind(paymentStore);
       const result=await transaction(async()=>{
