@@ -1,4 +1,4 @@
-# Velmora Forge
+# Vantira Forge
 
 Forge replaces balance-tier Earn with internal virtual collectibles. It uses the
 existing database and USDT accounting. It does not mint NFTs, provide physical

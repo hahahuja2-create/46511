@@ -1,8 +1,8 @@
 {
-  "name": "portgainy-platform",
+  "name": "vantira-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "Portgainy Earn, synthetic market positions, referrals and USDT wallets",
+  "description": "Vantira VIP levels, daily rewards, referrals and USDT wallets",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --env-file-if-exists=.env --watch server.js",

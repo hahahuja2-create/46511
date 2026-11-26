@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velmora core: state, API client, formatting, icons, router, toasts and sheets. */
+/* Vantira core: state, API client, formatting, icons, router, toasts and sheets. */
 
 const app = document.querySelector('#app');
 const toastRegion = document.querySelector('#toast-region');
@@ -159,7 +159,7 @@ const ERRORS = {
   AUTH_REQUIRED: 'Your session ended. Please sign in again.',
   INVALID_AMOUNT: 'Enter a valid USDT amount.',
   INVALID_WALLET: 'Enter a valid USDT wallet address.',
-  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Velmora deposit address.',
+  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Vantira deposit address.',
   INVALID_NETWORK: 'Choose a supported network.',
   INVALID_REFERRAL: 'Invite code was not found.',
   INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough available balance.',
@@ -321,9 +321,9 @@ function totalValue() {
   return num(user?.lockedBalance) + num(user?.withdrawBalance) + num(user?.reservedBalance);
 }
 
-const EARN_MIN_DEFAULT = 100;
-const EARN_TIERS = [[100,500,8],[500,1000,9],[1000,1700,10],[1700,2500,11],[2500,4000,12],[4000,null,13]];
-const earnRatePct = (balance = num(S.user?.lockedBalance)) => [...EARN_TIERS].reverse().find(t => balance >= t[0])?.[2] ?? 8;
+const EARN_MIN_DEFAULT = 50;
+const EARN_TIERS = [[50,500,5],[500,1000,5.5],[1000,1700,6],[1700,2500,6.5],[2500,4000,7],[4000,5000,7.5],[5000,8000,8],[8000,12000,9],[12000,null,10]];
+const earnRatePct = (balance = num(S.user?.lockedBalance)) => [...EARN_TIERS].reverse().find(t => balance >= t[0])?.[2] ?? 5;
 const earnMin = () => num(S.earn?.minimum, EARN_MIN_DEFAULT);
 const earnShortfall = () => Math.max(0, Math.round((earnMin() - num(S.user?.lockedBalance)) * 1e6) / 1e6);
 const earnActive = () => earnShortfall() === 0;

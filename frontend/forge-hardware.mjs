@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import designs from '../public/forge-designs.json';
 
-// Original Velmora arcade hardware: nine separately constructed silhouettes.
+// Original Vantira arcade hardware: nine separately constructed silhouettes.
 export const FORGE_DESIGNS=Object.freeze(designs);
 
 function bevelBox(w,h,d,r=0.09) {

@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velmora views, part 3: earn, referrals, profile, support, about and admin. */
+/* Vantira views, part 3: earn, referrals, profile, support, about and admin. */
 
 /* ------------------------------------------------------------------ earn */
 
@@ -21,9 +21,9 @@ function updateCalc() {
 function promoCard(p) {
   const unlocked = p.status === 'unlocked';
   const ended = !unlocked && serverNow() >= p.expiresAt;
-  const title = unlocked ? '15% daily VIP unlocked' : ended ? 'This offer has ended' : 'Unlock 15% daily VIP';
+  const title = unlocked ? '10% daily VIP rate unlocked' : ended ? 'This offer has ended' : 'Unlock up to 10% daily VIP';
   return `<article class="promo-card ${unlocked ? 'is-unlocked' : ''} ${ended ? 'is-ended' : ''}">
-    <div class="promo-card-top"><span class="tag tag-main">${unlocked ? 'Unlocked' : ended ? 'Ended' : '10-day offer'}</span><span class="promo-rate big"><b>10%</b>${icon('arrow')}<b class="hi">15%</b></span></div>
+    <div class="promo-card-top"><span class="tag tag-main">${unlocked ? 'Unlocked' : ended ? 'Ended' : '10-day offer'}</span><span class="promo-rate big"><b>${Math.round(p.baseRate * 100)}%</b>${icon('arrow')}<b class="hi">${Math.round(p.boostedRate * 100)}%</b></span></div>
     <h2>${title}</h2>
     ${ended ? '' : `<p>${unlocked ? 'Your higher daily rate is active permanently.' : `Invite ${p.requiredReferrals} active friends within your personal 10-day window. An active referral has confirmed deposits of at least ${p.minimumDepositUSDT} USDT.`}</p>`}
     <div class="prog"><span>${i18n.html("Active referrals")}</span><b>${p.qualifyingReferrals} / ${p.requiredReferrals}</b></div>
@@ -39,7 +39,7 @@ function referralsView() {
   const members = S.team?.members || [];
   const income = S.activities.filter(a => a.type === 'referral');
   return `<div class="page referrals">
-    <header class="page-head"><div><h1>${i18n.html("Referrals")}</h1><p>${i18n.html("Share {value0}. Grow your network.", {"value0":"Velmora"})}</p></div></header>
+    <header class="page-head"><div><h1>${i18n.html("Referrals")}</h1><p>${i18n.html("Share {value0}. Grow your network.", {"value0":"Vantira"})}</p></div></header>
     
     <article class="invite">
       <span class="eyebrow">${i18n.html("Your invite code")}</span>
@@ -70,7 +70,7 @@ function profileView() {
       <form class="form" data-form="profile" novalidate><label class="field"><span>${i18n.html("Display name")}</span><div class="control">${icon('user')}<input name="name" type="text" value="${esc(u.name)}" minlength="2" maxlength="50" required></div></label><p class="form-msg" id="profile-msg" role="alert"></p><button class="btn btn-ghost" type="submit">${icon('check')}${i18n.html('Save name')}</button></form>
       <dl class="facts"><div><dt>${i18n.html("Email")}</dt><dd>${esc(u.email)}</dd></div><div><dt>${i18n.html("Invite code")}</dt><dd>${esc(u.inviteCode)}</dd></div><div><dt>${i18n.html("Member since")}</dt><dd>${esc(dateText(u.createdAt, true))}</dd></div><div><dt>${i18n.html("Total earned")}</dt><dd>${money(displayEarnedTotal())} USDT</dd></div><div><dt>${i18n.html("Total withdrawn")}</dt><dd>${money(u.withdrawnTotal)} USDT</dd></div></dl>
     </section>
-    <section class="card links">${[['assets-history', 'receipt', i18n.text('Transaction history')], ['support', 'headset', i18n.text('Help & Support')], ['about', 'building', i18n.text('About Velmora')], ['referrals', 'users', i18n.text('Referrals')], ...(u.isAdmin ? [['admin', 'shield', i18n.text('Admin console')]] : [])].map(([v, g, l], i) => `<button type="button" data-act="${v === 'assets-history' ? 'assets-history' : 'goto'}" data-view="${v}"><i class="gi g${i % 4}">${icon(g)}</i><span>${esc(l)}</span>${icon('chevron')}</button>`).join('')}</section>
+    <section class="card links">${[['assets-history', 'receipt', i18n.text('Transaction history')], ['support', 'headset', i18n.text('Help & Support')], ['about', 'building', i18n.text('About Vantira')], ['referrals', 'users', i18n.text('Referrals')], ...(u.isAdmin ? [['admin', 'shield', i18n.text('Admin console')]] : [])].map(([v, g, l], i) => `<button type="button" data-act="${v === 'assets-history' ? 'assets-history' : 'goto'}" data-view="${v}"><i class="gi g${i % 4}">${icon(g)}</i><span>${esc(l)}</span>${icon('chevron')}</button>`).join('')}</section>
     <button class="btn btn-danger btn-lg btn-block" type="button" data-act="logout">${icon('logout')}${i18n.html('Sign out')}</button>
   </div>`;
 }
@@ -82,7 +82,7 @@ const FAQ = [
   ['How do I claim my daily reward?', 'Your first {claim} is available as soon as {earn} reaches {minimum} {currency}. Open {earn} and tap {claim}. Later claims are available once per day when the countdown finishes. Rewards credit your available balance and your {earn} principal stays untouched.', {claim:'Claim',earn:'VIP',minimum:String(EARN_MIN_DEFAULT),currency:'USDT'}],
   ['What are the withdrawal rules?', 'Withdrawals are requested from your available balance and confirmed with your password. Automatic processing depends on available funds and network resources. A {fee}% fee applies and the minimum request is {minimum} {currency}. Status updates appear under {assets} → {history}.', {fee:'2',minimum:'10',currency:'USDT',assets:'Assets',history:'History'}],
   ['How do referrals pay out?', 'Level {firstLevel} earns {firstRate}% and level {secondLevel} earns {secondRate}% of the {earn} rewards your network claims. Referral rewards credit your available balance.', {firstLevel:'1',firstRate:'10',secondLevel:'2',secondRate:'5',earn:'VIP'}],
-  ['How do I stay safe?', 'Use a unique password, never share it, and remember that Velmora staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.']
+  ['How do I stay safe?', 'Use a unique password, never share it, and remember that Vantira staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.']
 ];
 
 function filterFaq(query) {
@@ -93,16 +93,16 @@ function filterFaq(query) {
 function supportView() {
   const list = filterFaq(S.faqQuery);
   return `<div class="page support">
-    <header class="page-head"><div><h1>${i18n.html('Support')}</h1><p>${i18n.html('Answers, guides and the Velmora assistant.')}</p></div></header>
+    <header class="page-head"><div><h1>${i18n.html('Support')}</h1><p>${i18n.html('Answers, guides and the Vantira assistant.')}</p></div></header>
     <section class="card chat">
-      <div class="chat-head"><span class="bot-ic">${icon('bot')}</span><div><b>${i18n.html('Velmora Assistant')}</b><small>${i18n.html('Automated help · cannot move funds')}</small></div></div>
+      <div class="chat-head"><span class="bot-ic">${icon('bot')}</span><div><b>${i18n.html('Vantira Assistant')}</b><small>${i18n.html('Automated help · cannot move funds')}</small></div></div>
       <div class="chat-log" id="chat-log" aria-live="polite">${chatLog()}</div>
       <div class="chat-suggest">${['How do I deposit?', 'How does VIP work?', 'How do I withdraw?'].map(s => `<button type="button" data-act="chat-suggest" data-text="${esc(s)}">${i18n.html(s)}</button>`).join('')}</div>
       <form class="chat-form" data-form="chat"><input id="chat-input" type="text" maxlength="600" placeholder="${i18n.html('Ask a question…')}" autocomplete="off" aria-label="${i18n.html('Message')}"><button class="btn btn-main btn-icon" type="submit" aria-label="${i18n.html('Send')}">${icon('send')}</button></form>
     </section>
     <div class="search-field"><span>${icon('search')}</span><input id="faq-search" type="search" value="${esc(S.faqQuery || '')}" placeholder="${i18n.html('Search help articles')}" autocomplete="off" aria-label="${i18n.html('Search help')}"></div>
     <section class="faq" id="faq-list">${faqList(list)}</section>
-    <p class="fine center">${icon('shield')}${i18n.html('Velmora will never ask for your password, seed phrase or private keys.')}</p>
+    <p class="fine center">${icon('shield')}${i18n.html('Vantira will never ask for your password, seed phrase or private keys.')}</p>
   </div>`;
 }
 
@@ -110,7 +110,7 @@ const faqList = list => (list.length ? list.map(([a, b, parameters], i) => `<det
 
 function chatLog() {
   const C = S.chat;
-  const intro = `<div class="msg bot"><p>${i18n.html('Hi! I’m the Velmora assistant. Ask about deposits, withdrawals, VIP or referrals. I can’t change balances or give personal investment advice.')}</p></div>`;
+  const intro = `<div class="msg bot"><p>${i18n.html('Hi! I’m the Vantira assistant. Ask about deposits, withdrawals, VIP or referrals. I can’t change balances or give personal investment advice.')}</p></div>`;
   return intro + C.messages.map(m => `<div class="msg ${m.role}"><p>${m.role === 'bot' ? i18n.html(m.text) : esc(m.text)}</p>${m.links?.length ? `<div class="msg-links">${m.links.map(l => `<button type="button" data-act="goto" data-view="${esc(l.view)}">${i18n.html(l.label)}${icon('arrow')}</button>`).join('')}</div>` : ''}</div>`).join('') + (C.busy ? '<div class="msg bot typing"><i></i><i></i><i></i></div>' : '');
 }
 
@@ -143,33 +143,33 @@ function aboutView() {
     ['users', 'Referrals', i18n.text('Invite friends and receive {firstRate}% of their claimed rewards at level {firstLevel} and {secondRate}% at level {secondLevel}, credited to your {account} balance.', {firstRate:10,firstLevel:1,secondRate:5,secondLevel:2,account:'available'})],
     ['wallet', 'USDT wallet', 'A unique TRON (TRC20) deposit address per account, password-confirmed withdrawals and a clear status trail.']
   ];
-  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to create an account.'], ['Fund your VIP', i18n.text('Deposit {currency} ({network}). {account} starts once your {account} balance reaches {minimum} {currency}.', {currency:'USDT',network:'TRC20',account:'VIP',minimum:earnMin()})], ['Claim every day', i18n.text('Your first Claim is available when you start {earn}; later claims open once per day. Your daily rate is {range}, based on your {earn} balance. Rewards credit your available balance.', {earn:'VIP',range:'8–13%'})], ['Withdraw or move funds', i18n.text('Request a withdrawal from your available balance ({fee}% fee, {minimum} {currency} minimum) or move it back to {earn}.', {currency:'USDT',earn:'VIP',fee,minimum:10})]];
+  const steps = [['Create your account', 'Sign up with an email and password. No documents are needed to create an account.'], ['Fund your VIP', i18n.text('Deposit {currency} ({network}). {account} starts once your {account} balance reaches {minimum} {currency}.', {currency:'USDT',network:'TRC20',account:'VIP',minimum:earnMin()})], ['Claim every day', i18n.text('Your first Claim is available when you start {earn}; later claims open once per day. Your daily rate is {range}, based on your {earn} balance. Rewards credit your available balance.', {earn:'VIP',range:`${EARN_TIERS[0][2]}–${EARN_TIERS.at(-1)[2]}%`})], ['Withdraw or move funds', i18n.text('Request a withdrawal from your available balance ({fee}% fee, {minimum} {currency} minimum) or move it back to {earn}.', {currency:'USDT',earn:'VIP',fee,minimum:10})]];
   const accounts = [['VIP', 'Deposits and principal', 'Generates your daily reward. Principal is never reduced by claims.', 'earn'], ['Available', 'Rewards and withdrawals', 'Receives claims and referral rewards. Used for withdrawal requests.', 'wallet'], ['Reserved', 'Pending withdrawals', 'Funds held while a withdrawal request is processed.', 'clock']];
-  const limits = [['VIP minimum', `${earnMin()} USDT`], ['Daily reward rate', '8–13% of your VIP balance'], ['Claim cycle', 'First claim when you start VIP; then once per day'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
-  const safety = [['lock', 'Password-confirmed withdrawals', 'Confirm withdrawals with your account password. Automatic processing requires sufficient funds and network resources.'], ['qr', 'Unique deposit addresses', 'Each account receives its own TRON address. Deposits are credited only after blockchain confirmation.'], ['fingerprint', 'Idempotent operations', 'Claims, orders and withdrawals use request keys to protect retries against duplicate processing.'], ['shield', 'Protected sessions', 'Sessions use secure, same-site cookies and sensitive endpoints are rate-limited against abuse.'], ['key', 'No keys in the browser', 'The website never holds private keys or seed phrases and Velmora staff will never ask for them.'], ['history', 'Full transaction trail', 'Every deposit, transfer, claim, trade and withdrawal is recorded and can be exported as CSV.']];
+  const limits = [['VIP minimum', `${earnMin()} USDT`], ['Daily reward rate', `${EARN_TIERS[0][2]}–${EARN_TIERS.at(-1)[2]}% of your VIP balance`], ['Claim cycle', 'First claim when you start VIP; then once per day'], ['Referral rewards', 'Level 1: 10% · Level 2: 5%'], ['Withdrawal minimum', `${S.pay.minimum || 10} USDT`], ['Withdrawal fee', `${fee}%`], ['Deposit network', 'USDT on TRON (TRC20)']];
+  const safety = [['lock', 'Password-confirmed withdrawals', 'Confirm withdrawals with your account password. Automatic processing requires sufficient funds and network resources.'], ['qr', 'Unique deposit addresses', 'Each account receives its own TRON address. Deposits are credited only after blockchain confirmation.'], ['fingerprint', 'Idempotent operations', 'Claims, orders and withdrawals use request keys to protect retries against duplicate processing.'], ['shield', 'Protected sessions', 'Sessions use secure, same-site cookies and sensitive endpoints are rate-limited against abuse.'], ['key', 'No keys in the browser', 'The website never holds private keys or seed phrases and Vantira staff will never ask for them.'], ['history', 'Full transaction trail', 'Every deposit, transfer, claim, trade and withdrawal is recorded and can be exported as CSV.']];
   return `<div class="page about">
     <article class="about-hero">
       <div class="about-cube">${markImg(120, 'float')}</div>
       ${wordmark('is-lg')}
       <h1>${i18n.html("Levels, rewards and {value0},", {"value0":"USDT"})} <span>${i18n.html("in one place.")}</span></h1>
-      <p>${i18n.html("{value0} is a simple VIP workspace: six levels, a daily reward, a two-level referral program and a {value1} wallet, designed to be clear about where every balance lives.", {"value0":"Velmora","value1":"USDT"})}</p>
+      <p>${i18n.html("{value0} is a simple VIP workspace: nine levels, a daily reward, a two-level referral program and a {value1} wallet, designed to be clear about where every balance lives.", {"value0":"Vantira","value1":"USDT"})}</p>
       <div class="btn-row about-cta">${S.user ? `<button class="btn btn-main" data-act="wallet-deposit">${icon('plus')}${i18n.html("Top up")}</button><button class="btn btn-ghost" data-act="goto" data-view="earn">${icon('earn')}${i18n.html("Open VIP")}</button>` : `<button class="btn btn-main" data-act="auth-home">${icon('rocket')}${i18n.html("Get started")}</button><button class="btn btn-ghost" data-act="goto" data-view="support">${icon('headset')}${i18n.html("Support")}</button>`}</div>
     </article>
     <section class="facts-strip">${facts.map(([v, l]) => `<div><b>${esc(v)}</b><span>${i18n.html(l)}</span></div>`).join('')}</section>
 
     <section class="card about-sec"><span class="eyebrow">${i18n.html("Who we are")}</span><h2>${i18n.html("Built for clarity and speed")}</h2>
-      <p>${i18n.html("{value0} brings together what members use every day: a clear VIP level, a daily reward cycle and a wallet that explains itself. Everything is designed mobile-first, so the full experience fits in your pocket while still scaling up to a complete desktop workspace.", {"value0":"Velmora"})}</p>
+      <p>${i18n.html("{value0} brings together what members use every day: a clear VIP level, a daily reward cycle and a wallet that explains itself. Everything is designed mobile-first, so the full experience fits in your pocket while still scaling up to a complete desktop workspace.", {"value0":"Vantira"})}</p>
       <p>${i18n.html("We keep the model simple and visible. Your balances are split into clearly labeled accounts, every action leaves a record, and every limit, fee and rule is written down on this page instead of buried in fine print.")}</p></section>
 
     <section class="block">${sectionHead('What you can do')}<div class="pillars">${products.map(([g, t, d]) => `<article><span class="pillar-ic">${icon(g)}</span><h3>${i18n.html(t)}</h3><p>${i18n.html(d)}</p></article>`).join('')}</div></section>
 
-    <section class="card about-sec"><span class="eyebrow">${i18n.html("Step by step")}</span><h2>${i18n.html("How {value0} works", {"value0":"Velmora"})}</h2>
+    <section class="card about-sec"><span class="eyebrow">${i18n.html("Step by step")}</span><h2>${i18n.html("How {value0} works", {"value0":"Vantira"})}</h2>
       <ol class="how">${steps.map(([t, d], i) => `<li><span class="how-n">${i + 1}</span><div><b>${i18n.html(t)}</b><p>${i18n.html(d)}</p></div></li>`).join('')}</ol></section>
 
     <section class="block">${sectionHead('Your accounts')}<div class="acct-cards">${accounts.map(([t, sub, d, g]) => `<article class="tile"><span class="tile-ic ${t === 'Available' ? 'is-cyan' : ''}">${icon(g)}</span><strong>${i18n.html(t)}</strong><small>${i18n.html(sub)}</small><p>${i18n.html(d)}</p></article>`).join('')}</div></section>
 
     <section class="card about-sec"><span class="eyebrow">VIP</span><h2>${i18n.html("A daily reward on your VIP balance")}</h2>
-      <p>${i18n.html("VIP starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your VIP balance at Claim. Your first Claim is available when you start VIP. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.", {"value0":String(earnMin()),"value1":"USDT","value2":"8","value3":"13%"})}</p>${earnTierTable()}
+      <p>${i18n.html("VIP starts at {value0} {value1}. Your daily rate is {value2}–{value3}, based on your VIP balance at Claim. Your first Claim is available when you start VIP. After that, use the countdown to see when your next daily Claim opens. Missed days do not accumulate, and claims do not reduce your principal.", {"value0":String(earnMin()),"value1":"USDT","value2":String(EARN_TIERS[0][2]),"value3":`${EARN_TIERS.at(-1)[2]}%`})}</p>${earnTierTable()}
       <ul class="ticks"><li>${icon('check')}${i18n.html("Rewards are credited to your available balance.")}</li><li>${icon('check')}${i18n.html("Level {value0} referrals earn you {value1} and level {value2} earns you {value3} of each reward they claim, without reducing theirs.", {"value0":"1","value1":"10%","value2":"2","value3":"5%"})}</li><li>${icon('check')}${i18n.html("Accounts below {value0} {value1} see exactly how much is needed to start.", {"value0":String(earnMin()),"value1":"USDT"})}</li></ul></section>
 
     <section class="block">${sectionHead('Security & safeguards')}<div class="pillars safety">${safety.map(([g, t, d]) => `<article><span class="pillar-ic">${icon(g)}</span><h3>${i18n.html(t)}</h3><p>${i18n.html(d)}</p></article>`).join('')}</div></section>
@@ -181,9 +181,9 @@ function aboutView() {
       <div class="status-row"><span class="tag tag-main">${esc(status)}</span></div></section>
 
     <section class="card about-sec disclaimer"><span class="eyebrow warn">${i18n.html("Risk notice")}</span><h2>${i18n.html("Please read")}</h2>
-      <p>${i18n.html("Reward rates and program terms can change and are not guaranteed, and you can lose the funds you deposit. Past results do not indicate future performance. Nothing on {value0} is investment, legal or tax advice. Only use funds you can afford to lose and keep your credentials private.", {"value0":"Velmora"})}</p></section>
+      <p>${i18n.html("Reward rates and program terms can change and are not guaranteed, and you can lose the funds you deposit. Past results do not indicate future performance. Nothing on {value0} is investment, legal or tax advice. Only use funds you can afford to lose and keep your credentials private.", {"value0":"Vantira"})}</p></section>
 
-    <section class="about-end"><h2>${i18n.html("Questions?")}</h2><p>${i18n.html("Browse the help center or ask the {value0} assistant any time.", {"value0":"Velmora"})}</p><button class="btn btn-main" data-act="goto" data-view="support">${icon('headset')}${i18n.html("Visit Support")}</button></section>
+    <section class="about-end"><h2>${i18n.html("Questions?")}</h2><p>${i18n.html("Browse the help center or ask the {value0} assistant any time.", {"value0":"Vantira"})}</p><button class="btn btn-main" data-act="goto" data-view="support">${icon('headset')}${i18n.html("Visit Support")}</button></section>
   </div>`;
 }
 

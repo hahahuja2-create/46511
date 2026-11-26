@@ -1,9 +1,9 @@
 'use strict';
 
-/* Velmora views, part 1: shell, auth, activity list and transaction details. */
+/* Vantira views, part 1: shell, auth, activity list and transaction details. */
 
-const wordmark = (cls = '') => `<span class="wordmark ${cls}" role="img" aria-label="Velmora"><span>Velmora</span></span>`;
-const markImg = (size = 40, cls = '') => `<img class="mark ${cls}" src="/assets/brand/velmora-mark.svg?v=vm1" width="${size}" height="${size}" alt="" decoding="async">`;
+const wordmark = (cls = '') => `<span class="wordmark ${cls}" role="img" aria-label="Vantira"><span>Vantira</span></span>`;
+const markImg = (size = 40, cls = '') => `<img class="mark ${cls}" src="/assets/brand/vantira-mark.svg?v=vt1" width="${size}" height="${size}" alt="" decoding="async">`;
 const brandLockup = (size = 38) => `${markImg(size)}${wordmark()}`;
 
 function avatarHex(name, cls = '') {
@@ -43,7 +43,7 @@ function topBar(name) {
   const title = i18n.text(TITLES[S.view] || 'Home');
   return `<header class="rt-bar${inner ? ' is-inner' : ''}" id="ab"><div class="rt-in">
     <button class="rt-back" type="button" data-act="back" aria-label="${i18n.html('Back')}">${icon('chevronLeft')}</button>
-    <button class="rt-brand" type="button" data-act="goto" data-view="home" aria-label="Velmora">${brandLockup(30)}</button>
+    <button class="rt-brand" type="button" data-act="goto" data-view="home" aria-label="Vantira">${brandLockup(30)}</button>
     <b class="rt-title">${esc(title)}</b>
     <nav class="rt-nav" aria-label="${i18n.html('Main')}">${NAV_ITEMS.map(item => navButton(item, 'rt')).join('')}</nav>
     <span class="rt-right">
@@ -61,7 +61,7 @@ function renderShell() {
     ${topBar(name)}
     <div class="stage">
       <main class="content" id="content">${S.platform?.localTestWallet ? `<p class="note">${icon('info')}Local testing · Account balances and deposits here are simulated. Do not send real crypto.</p>` : ''}${body}</main>
-      <footer class="foot"><span>Velmora &copy; 2026</span><span>${i18n.html('Reward rates and program terms can change and are not guaranteed.')}</span></footer>
+      <footer class="foot"><span>Vantira &copy; 2026</span><span>${i18n.html('Reward rates and program terms can change and are not guaranteed.')}</span></footer>
     </div>
     <nav class="rt-tabs" aria-label="${i18n.html('Primary')}">${NAV_ITEMS.map(item => navButton(item, 'tab')).join('')}</nav>
   </div>`;
@@ -74,7 +74,7 @@ function renderAuth() {
   app.innerHTML = `<main class="auth">
     <div class="auth-top"><span class="rail-brand">${brandLockup(30)}</span><span class="auth-tools"><button class="link-btn" data-act="goto" data-view="about">${i18n.html("About")}</button><button class="link-btn" data-act="goto" data-view="support">${i18n.html("Support")}</button>${themeButton()}${langSelect()}</span></div>
     <section class="auth-card">
-      <div class="auth-head"><span class="auth-badge">${markImg(56)}</span><div><h1>${i18n.html(signup ? 'Join Velmora' : 'Welcome back')}</h1><p class="auth-lead">${i18n.html(signup ? 'Create your account in a minute.' : 'Sign in to continue to your workspace.')}</p></div></div>
+      <div class="auth-head"><span class="auth-badge">${markImg(56)}</span><div><h1>${i18n.html(signup ? 'Join Vantira' : 'Welcome back')}</h1><p class="auth-lead">${i18n.html(signup ? 'Create your account in a minute.' : 'Sign in to continue to your workspace.')}</p></div></div>
       <div class="seg" role="tablist" aria-label="${i18n.html("Account")}">
         <button class="${!signup ? 'is-on' : ''}" type="button" role="tab" aria-selected="${!signup}" data-act="auth-mode" data-mode="login">${i18n.html("Sign in")}</button>
         <button class="${signup ? 'is-on' : ''}" type="button" role="tab" aria-selected="${signup}" data-act="auth-mode" data-mode="signup">${i18n.html("Create account")}</button>
@@ -87,7 +87,7 @@ function renderAuth() {
         <p class="form-msg" id="auth-message" role="alert"></p>
         <button class="btn btn-main btn-lg btn-block" type="submit">${i18n.html(signup ? 'Create account' : 'Sign in')}${icon('arrow')}</button>
       </form>
-      <p class="auth-fine">${i18n.html("By continuing you agree to use {value0} responsibly. Reward rates and program terms can change and are not guaranteed; only use funds you can afford to lose.", {"value0":"Velmora"})}</p>
+      <p class="auth-fine">${i18n.html("By continuing you agree to use {value0} responsibly. Reward rates and program terms can change and are not guaranteed; only use funds you can afford to lose.", {"value0":"Vantira"})}</p>
     </section>
   </main>`;
 }
@@ -116,7 +116,7 @@ function activityTitle(a) {
     case 'withdraw': return i18n.text('Withdrawal request');
     case 'transfer': return i18n.text('Transfer to VIP');
     case 'spot': return i18n.text('{action} {asset}', {action:i18n.text(a.side === 'BUY' ? 'Bought' : 'Sold'),asset:a.base || ''}).trim();
-    case 'welcome': return i18n.text('Welcome to Velmora');
+    case 'welcome': return i18n.text('Welcome to Vantira');
     case 'topup': return i18n.text('VIP minimum top-up');
     case 'task': return i18n.text('Task reward (legacy)');
     case 'vip': return a.vipName ? i18n.text('Membership purchase · {name} (legacy)', {name:a.vipName}) : i18n.text('Membership purchase (legacy)');

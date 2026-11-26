@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velmora views, part 2: wallet, deposit / withdraw / transfer sheets, history export and notifications. */
+/* Vantira views, part 2: wallet, deposit / withdraw / transfer sheets, history export and notifications. */
 
 /* ---------------------------------------------------------------- assets */
 
@@ -23,7 +23,7 @@ function exportHistory() {
   const rows = [['Type', 'Date', 'Amount USDT', 'Status', 'Net USDT', 'Fee USDT', 'TxID'], ...S.activities.map(a => [activityTitle(a), a.at, num(a.amount), a.status || '', a.netAmount ?? '', a.fee ?? '', a.txid || ''])];
   const blob = new Blob(['﻿' + rows.map(r => r.map(quoteCell).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob), link = document.createElement('a');
-  link.href = url; link.download = 'velmora-transactions.csv'; link.click();
+  link.href = url; link.download = 'vantira-transactions.csv'; link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 

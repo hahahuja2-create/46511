@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velmora main: rendering, data loading and event wiring. */
+/* Vantira main: rendering, data loading and event wiring. */
 
 const TITLES = { home: 'Home', earn: 'VIP', assets: 'Wallet', referrals: 'Referrals', profile: 'Profile', support: 'Support', about: 'About', admin: 'Admin' };
 
@@ -19,7 +19,7 @@ function render() {
   if (S.loading) renderLoading();
   else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else renderAuth(); }
   else renderShell();
-  document.title = S.user || PUBLIC_VIEWS.includes(S.view) ? `Velmora | ${i18n.text(TITLES[S.view] || 'Home')}` : 'Velmora';
+  document.title = S.user || PUBLIC_VIEWS.includes(S.view) ? `Vantira | ${i18n.text(TITLES[S.view] || 'Home')}` : 'Vantira';
   document.body.dataset.view = S.user ? S.view : (PUBLIC_VIEWS.includes(S.view) ? 'public' : 'auth');
   postRender();
   window.scrollTo(0, y);
@@ -144,7 +144,7 @@ async function showPromotionNotice() {
     S.user.referralPromotion = result.promotion;
     if (result.show && S.user) {
       const pr = result.promotion;
-      openSheet(`<div class="notice"><span class="tag tag-main">${pr.status === 'unlocked' ? 'Unlocked' : '10-day offer'}</span><div class="promo-rate big"><b>10%</b>${icon('arrow')}<b class="hi">15%</b></div><h2>${pr.status === 'unlocked' ? '15% daily VIP unlocked' : 'Unlock 15% daily VIP'}</h2><p>Invite ${pr.requiredReferrals} active friends within your personal 10-day window. An active referral has at least ${pr.minimumDepositUSDT} USDT in confirmed deposits. Existing active referrals count too.</p><div class="prog"><span>Active referrals</span><b>${pr.qualifyingReferrals} / ${pr.requiredReferrals}</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(pr.qualifyingReferrals / pr.requiredReferrals, 0, 1) * 100)}%"></b></i><div class="sheet-actions"><button class="btn btn-ghost" data-act="close-sheet">Got it</button><button class="btn btn-main" data-act="goto" data-view="referrals">View referrals${icon('arrow')}</button></div></div>`, { label: 'Referral offer' });
+      openSheet(`<div class="notice"><span class="tag tag-main">${pr.status === 'unlocked' ? 'Unlocked' : '10-day offer'}</span><div class="promo-rate big"><b>${Math.round(pr.baseRate * 100)}%</b>${icon('arrow')}<b class="hi">${Math.round(pr.boostedRate * 100)}%</b></div><h2>${pr.status === 'unlocked' ? '10% daily VIP rate unlocked' : 'Unlock up to 10% daily VIP'}</h2><p>Invite ${pr.requiredReferrals} active friends within your personal 10-day window. An active referral has at least ${pr.minimumDepositUSDT} USDT in confirmed deposits. Existing active referrals count too.</p><div class="prog"><span>Active referrals</span><b>${pr.qualifyingReferrals} / ${pr.requiredReferrals}</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(pr.qualifyingReferrals / pr.requiredReferrals, 0, 1) * 100)}%"></b></i><div class="sheet-actions"><button class="btn btn-ghost" data-act="close-sheet">Got it</button><button class="btn btn-main" data-act="goto" data-view="referrals">View referrals${icon('arrow')}</button></div></div>`, { label: 'Referral offer' });
     }
   } catch { setTimeout(() => { S.noticeRequested = false; }, 30000); }
 }
@@ -228,7 +228,7 @@ const acts = {
   'copy-invite-link': async () => { if (await copyText(inviteUrl(S.team?.inviteCode || S.user.inviteCode))) toast('Invite link copied'); },
   'share-invite': async () => {
     const url = inviteUrl(S.team?.inviteCode || S.user.inviteCode);
-    if (navigator.share) { try { await navigator.share({ title: 'Velmora', text: 'Join me on Velmora and start climbing the VIP levels.', url }); return; } catch { /* cancelled */ } }
+    if (navigator.share) { try { await navigator.share({ title: 'Vantira', text: 'Join me on Vantira and start climbing the VIP levels.', url }); return; } catch { /* cancelled */ } }
     if (await copyText(url)) toast('Invite link copied');
   },
   logout: async () => {
@@ -333,7 +333,7 @@ async function submitAuth(form) {
     S.user = result.user; await useAccountLanguage(S.user); S.view = 'home'; S.referralCode = '';
     const url = new URL(location.href); url.searchParams.delete('ref'); history.replaceState(null, '', `${url.pathname}${url.search}#home`);
     await loadAll(); render(); showEarnNotice();
-    if (signup) toast('Account created. Welcome to Velmora.', 'ok', 'Welcome');
+    if (signup) toast('Account created. Welcome to Vantira.', 'ok', 'Welcome');
   } catch (error) { msg.textContent = errMsg(error); button.disabled = false; } finally { S.busy = false; }
 }
 

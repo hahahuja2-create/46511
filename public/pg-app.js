@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Velmora app screens: the membership pass, Home, the VIP levels page, Wallet and the Profile header.
+ * Vantira app screens: the membership pass, Home, the VIP levels page, Wallet and the Profile header.
  * One responsive layout serves phone and desktop; the shell (sidebar / dock) lives in pg-views.js.
  */
 
@@ -9,7 +9,8 @@
 
 const VIP_TIERS = [
   { n: 1, name: 'Bronze', gem: '#cf8f5d' }, { n: 2, name: 'Silver', gem: '#cfd6df' }, { n: 3, name: 'Gold', gem: '#e3b95f' },
-  { n: 4, name: 'Platinum', gem: '#a9c6da' }, { n: 5, name: 'Diamond', gem: '#8fe6ff' }, { n: 6, name: 'Black', gem: '#46403a' }
+  { n: 4, name: 'Platinum', gem: '#a9c6da' }, { n: 5, name: 'Diamond', gem: '#8fe6ff' }, { n: 6, name: 'Black', gem: '#46403a' },
+  { n: 7, name: 'Elite', gem: '#a78bfa' }, { n: 8, name: 'Sapphire', gem: '#60a5fa' }, { n: 9, name: 'Royal', gem: '#fbbf24' }
 ];
 const nf0 = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 
@@ -54,7 +55,7 @@ function passCard({ detail = false } = {}) {
       <div><small>${i18n.html('VIP balance')}</small><b>${money(u.lockedBalance)}</b></div>
     </div>
     ${forge ? '' : `<div class="pass-cta">${claimControl()}${detail ? '<p class="form-msg" id="earn-error" role="alert"></p>' : ''}</div>`}
-    <div class="pass-foot"><span>${i18n.html('Member ID')} · ${esc(u.inviteCode)}</span><span class="pass-brand">VELMORA</span></div>
+    <div class="pass-foot"><span>${i18n.html('Member ID')} · ${esc(u.inviteCode)}</span><span class="pass-brand">VANTIRA</span></div>
   </article>`;
 }
 

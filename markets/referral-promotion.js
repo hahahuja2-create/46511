@@ -63,7 +63,7 @@ function snapshot(state, user, now = Date.now()) {
   return { id: campaign.id, durationDays: 10, requiredReferrals: REQUIRED, minimumDepositUSDT: 50,
     startsAt, expiresAt, activeReferrals: active.size, qualifyingReferrals: qualifying.length, unlockedAt,
     status: unlocked ? 'unlocked' : now >= expiresAt ? 'expired' : 'active',
-    baseRate: 0.1, boostedRate: 0.15, rate: unlocked ? 0.15 : 0.1,
+    baseRate: 0.05, boostedRate: 0.1, rate: unlocked ? 0.1 : 0.05,
     announcementPending: user.referralPromotionAnnouncement?.id !== campaign.id };
 }
 
@@ -74,7 +74,12 @@ function rateBps(state, user, now = Date.now()) {
 const EARN_MINIMUM = 50_000_000n;
 
 // Earn starts at 50 USDT; smaller balances accrue no reward until they reach the minimum.
-const minimumUnits = state => (/^\d+$/.test(state?.earn?.minimumUnits ?? '') ? BigInt(state.earn.minimumUnits) : EARN_MINIMUM);
+const minimumUnits = state => {
+  if (!/^\d+$/.test(state?.earn?.minimumUnits ?? '')) return EARN_MINIMUM;
+  // Older production state may still store 100 USDT. The current public minimum is 50.
+  const saved = BigInt(state.earn.minimumUnits);
+  return saved > EARN_MINIMUM ? EARN_MINIMUM : saved;
+};
 
 function rewardUnits(state, user, now = Date.now()) {
   if (units(user.lockedBalance) < minimumUnits(state)) return 0n;

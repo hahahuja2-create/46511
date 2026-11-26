@@ -58,7 +58,7 @@ test('profile language uses account preference, survives reload and returns to E
     assert.equal(await page.locator('.profile-language > span').textContent(),'ენა');
     assert.deepEqual(await page.evaluate(()=>({locked:S.user.lockedBalance,spot:S.user.withdrawBalance,earned:S.user.earnedTotal})),before);
     const notice = await page.evaluate(()=>{const el=document.createElement('div');el.innerHTML=earnNoticeContent();return el.textContent;});
-    assert.match(notice,/კეთილი იყოს თქვენი მობრძანება Velmora-ში/);
+    assert.match(notice,/კეთილი იყოს თქვენი მობრძანება Vantira-ში/);
     assert.match(notice,/50 USDT/);
     assert.match(notice,/2% fee/);
     assert.doesNotMatch(notice,/\{(?:minimum|fee|range)\}/);

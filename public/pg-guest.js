@@ -1,6 +1,6 @@
 'use strict';
 
-/* Velmora guest shell: language and theme controls, the slim public chrome for About and Support,
+/* Vantira guest shell: language and theme controls, the slim public chrome for About and Support,
    and the shared document handlers. There is no landing page: signed-out visitors go straight to sign-in. */
 
 const lt = (source, parameters) => i18n.html(source, parameters);
@@ -20,7 +20,7 @@ const themeButton = () => `<button class="theme-btn" type="button" data-act="tog
 
 function guestHeader() {
   return `<header class="gx"><div class="gx-in">
-    <button class="gx-brand" type="button" data-act="auth-open" data-mode="login" aria-label="Velmora">${brandLockup(32)}</button>
+    <button class="gx-brand" type="button" data-act="auth-open" data-mode="login" aria-label="Vantira">${brandLockup(32)}</button>
     <nav class="gx-nav" aria-label="${lt('Main')}"><button type="button" data-act="goto" data-view="about">${lt('About')}</button><button type="button" data-act="goto" data-view="support">${lt('Support')}</button></nav>
     <span class="gx-right">${themeButton()}${langSelect()}
       <button class="btn btn-ghost btn-sm" type="button" data-act="auth-open" data-mode="login">${lt('Log in')}</button>
@@ -29,8 +29,8 @@ function guestHeader() {
 }
 
 function guestFooter() {
-  return `<footer class="gf"><p>${lt('Reward rates and program terms can change and are not guaranteed. Nothing on Velmora is investment advice. Only use funds you can afford to lose.')}</p>
-    <div class="gf-bottom"><span>Velmora &copy; 2026</span><span>${lt('Account currency')}: USDT</span></div></footer>`;
+  return `<footer class="gf"><p>${lt('Reward rates and program terms can change and are not guaranteed. Nothing on Vantira is investment advice. Only use funds you can afford to lose.')}</p>
+    <div class="gf-bottom"><span>Vantira &copy; 2026</span><span>${lt('Account currency')}: USDT</span></div></footer>`;
 }
 
 function renderPublic() {
