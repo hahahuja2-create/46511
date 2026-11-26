@@ -10,7 +10,7 @@ const TIERS = Object.freeze([
   { minimum:8000, maximum:12000, bps:900 },
   { minimum:12000, maximum:null, bps:1000 }
 ].map(Object.freeze));
-const NOTICE_VERSION = 'vantira-2026-11-v5';
+const NOTICE_VERSION = 'vantirena-2026-11-v6';
 function rateBps(balanceUnits) {
   const balance = BigInt(balanceUnits);
   return [...TIERS].reverse().find(t => balance >= BigInt(t.minimum)*1_000_000n)?.bps ?? TIERS[0].bps;

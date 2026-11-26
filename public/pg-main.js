@@ -1,6 +1,6 @@
 'use strict';
 
-/* Vantira main: rendering, data loading and event wiring. */
+/* Vantirena main: rendering, data loading and event wiring. */
 
 const TITLES = { home: 'Home', earn: 'VIP', assets: 'Wallet', referrals: 'Referrals', profile: 'Profile', support: 'Support', about: 'About', admin: 'Admin' };
 
@@ -19,7 +19,7 @@ function render() {
   if (S.loading) renderLoading();
   else if (!S.user) { if (PUBLIC_VIEWS.includes(S.view)) renderPublic(); else renderAuth(); }
   else renderShell();
-  document.title = S.user || PUBLIC_VIEWS.includes(S.view) ? `Vantira | ${i18n.text(TITLES[S.view] || 'Home')}` : 'Vantira';
+  document.title = S.user || PUBLIC_VIEWS.includes(S.view) ? `Vantirena | ${i18n.text(TITLES[S.view] || 'Home')}` : 'Vantirena';
   document.body.dataset.view = S.user ? S.view : (PUBLIC_VIEWS.includes(S.view) ? 'public' : 'auth');
   postRender();
   window.scrollTo(0, y);
@@ -228,7 +228,7 @@ const acts = {
   'copy-invite-link': async () => { if (await copyText(inviteUrl(S.team?.inviteCode || S.user.inviteCode))) toast('Invite link copied'); },
   'share-invite': async () => {
     const url = inviteUrl(S.team?.inviteCode || S.user.inviteCode);
-    if (navigator.share) { try { await navigator.share({ title: 'Vantira', text: 'Join me on Vantira and start climbing the VIP levels.', url }); return; } catch { /* cancelled */ } }
+    if (navigator.share) { try { await navigator.share({ title: 'Vantirena', text: 'Join me on Vantirena and start climbing the VIP levels.', url }); return; } catch { /* cancelled */ } }
     if (await copyText(url)) toast('Invite link copied');
   },
   logout: async () => {
@@ -333,7 +333,7 @@ async function submitAuth(form) {
     S.user = result.user; await useAccountLanguage(S.user); S.view = 'home'; S.referralCode = '';
     const url = new URL(location.href); url.searchParams.delete('ref'); history.replaceState(null, '', `${url.pathname}${url.search}#home`);
     await loadAll(); render(); showEarnNotice();
-    if (signup) toast('Account created. Welcome to Vantira.', 'ok', 'Welcome');
+    if (signup) toast('Account created. Welcome to Vantirena.', 'ok', 'Welcome');
   } catch (error) { msg.textContent = errMsg(error); button.disabled = false; } finally { S.busy = false; }
 }
 

@@ -1,4 +1,4 @@
-/* Vantira screens and components. The shell, home, VIP and wallet layouts live in pg-shell.css. */
+/* Vantirena screens and components. The shell, home, VIP and wallet layouts live in pg-shell.css. */
 
 .page { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 12px; align-content: start; animation: page-in 0.4s var(--glide) backwards; }
 @keyframes page-in { from { opacity: 0; transform: translateY(8px); } }

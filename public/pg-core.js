@@ -1,6 +1,6 @@
 'use strict';
 
-/* Vantira core: state, API client, formatting, icons, router, toasts and sheets. */
+/* Vantirena core: state, API client, formatting, icons, router, toasts and sheets. */
 
 const app = document.querySelector('#app');
 const toastRegion = document.querySelector('#toast-region');
@@ -159,7 +159,7 @@ const ERRORS = {
   AUTH_REQUIRED: 'Your session ended. Please sign in again.',
   INVALID_AMOUNT: 'Enter a valid USDT amount.',
   INVALID_WALLET: 'Enter a valid USDT wallet address.',
-  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Vantira deposit address.',
+  WITHDRAWAL_DESTINATION_IS_PLATFORM_ADDRESS: 'Enter an external wallet address, not a Vantirena deposit address.',
   INVALID_NETWORK: 'Choose a supported network.',
   INVALID_REFERRAL: 'Invite code was not found.',
   INSUFFICIENT_WITHDRAW_BALANCE: 'Not enough available balance.',

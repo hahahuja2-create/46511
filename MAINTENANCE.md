@@ -20,7 +20,7 @@ in isolated `NODE_ENV=test` fixtures. Normal application fixtures explicitly dis
 maintenance when they exercise development or production mode.
 
 A dedicated, 43-character `TASKMALL_LOCAL_REVIEW_TOKEN` allows the loopback
-Vantira gateway to forward customer API requests during maintenance. The gateway
+Vantirena gateway to forward customer API requests during maintenance. The gateway
 retrieves it using authenticated Railway SSH and supplies `X-Taskmall-Local-Review`
 server-side; it is never exposed to browser code. An absent or incorrect token
 leaves maintenance in effect. The exception applies only to `/api/` and does not

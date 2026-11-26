@@ -320,7 +320,7 @@
       {
         "location": "public/pg-notice.js:12",
         "placeholders": {
-          "platform": "Vantira"
+          "platform": "Vantirena"
         }
       }
     ]
@@ -361,7 +361,7 @@
       {
         "location": "public/pg-more.js:161",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -393,7 +393,7 @@
       {
         "location": "public/pg-more.js:155",
         "placeholders": {
-          "value0": "Vantira",
+          "value0": "Vantirena",
           "value1": "USDT"
         }
       }
@@ -491,7 +491,7 @@
     ],
     "examples": []
   },
-  "About Vantira": {
+  "About Vantirena": {
     "locations": [
       "public/pg-more.js:73"
     ],
@@ -518,7 +518,7 @@
     ],
     "examples": []
   },
-  "Account created. Welcome to Vantira.": {
+  "Account created. Welcome to Vantirena.": {
     "locations": [
       "public/pg-main.js:336"
     ],
@@ -752,7 +752,7 @@
     ],
     "examples": []
   },
-  "Answers, guides and the Vantira assistant.": {
+  "Answers, guides and the Vantirena assistant.": {
     "locations": [
       "public/pg-more.js:96"
     ],
@@ -939,7 +939,7 @@
       {
         "location": "public/pg-more.js:186",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -958,7 +958,7 @@
       {
         "location": "public/pg-views.js:90",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -1731,7 +1731,7 @@
     ],
     "examples": []
   },
-  "Enter an external wallet address, not a Vantira deposit address.": {
+  "Enter an external wallet address, not a Vantirena deposit address.": {
     "locations": [
       "public/pg-core.js:152"
     ],
@@ -2065,7 +2065,7 @@
     ],
     "examples": []
   },
-  "Hi! I’m the Vantira assistant. Ask about deposits, withdrawals, VIP or referrals. I can’t change balances or give personal investment advice.": {
+  "Hi! I’m the Vantirena assistant. Ask about deposits, withdrawals, VIP or referrals. I can’t change balances or give personal investment advice.": {
     "locations": [
       "public/pg-more.js:113"
     ],
@@ -2103,7 +2103,7 @@
       {
         "location": "public/pg-more.js:166",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -2287,7 +2287,7 @@
     ],
     "examples": []
   },
-  "Join Vantira": {
+  "Join Vantirena": {
     "locations": [
       "public/pg-views.js:77"
     ],
@@ -2988,7 +2988,7 @@
       {
         "location": "public/pg-notice.js:10",
         "placeholders": {
-          "platform": "Vantira"
+          "platform": "Vantirena"
         }
       }
     ]
@@ -3361,7 +3361,7 @@
       {
         "location": "public/pg-more.js:184",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -3372,7 +3372,7 @@
     ],
     "examples": []
   },
-  "Reward rates and program terms can change and are not guaranteed. Nothing on Vantira is investment advice. Only use funds you can afford to lose.": {
+  "Reward rates and program terms can change and are not guaranteed. Nothing on Vantirena is investment advice. Only use funds you can afford to lose.": {
     "locations": [
       "public/pg-guest.js:32"
     ],
@@ -3564,7 +3564,7 @@
       {
         "location": "public/pg-more.js:42",
         "placeholders": {
-          "value0": "Vantira"
+          "value0": "Vantirena"
         }
       }
     ]
@@ -3797,7 +3797,7 @@
     ],
     "examples": []
   },
-  "The website never holds private keys or seed phrases and Vantira staff will never ask for them.": {
+  "The website never holds private keys or seed phrases and Vantirena staff will never ask for them.": {
     "locations": [
       "public/pg-more.js:149"
     ],
@@ -4114,7 +4114,7 @@
     ],
     "examples": []
   },
-  "Use a unique password, never share it, and remember that Vantira staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.": {
+  "Use a unique password, never share it, and remember that Vantirena staff will never ask for your password or seed phrase. Check addresses carefully before sending funds.": {
     "locations": [
       "public/pg-more.js:80"
     ],
@@ -4144,19 +4144,19 @@
     ],
     "examples": []
   },
-  "Vantira Assistant": {
+  "Vantirena Assistant": {
     "locations": [
       "public/pg-more.js:98"
     ],
     "examples": []
   },
-  "Vantira original · Genesis collection": {
+  "Vantirena original · Genesis collection": {
     "locations": [
       "public/pg-forge.js:59"
     ],
     "examples": []
   },
-  "Vantira will never ask for your password, seed phrase or private keys.": {
+  "Vantirena will never ask for your password, seed phrase or private keys.": {
     "locations": [
       "public/pg-more.js:105"
     ],
@@ -4398,12 +4398,12 @@
       {
         "location": "public/pg-notice.js:9",
         "placeholders": {
-          "platform": "Vantira"
+          "platform": "Vantirena"
         }
       }
     ]
   },
-  "Welcome to Vantira": {
+  "Welcome to Vantirena": {
     "locations": [
       "public/pg-views.js:119"
     ],
