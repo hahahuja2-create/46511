@@ -3,7 +3,7 @@
 /* Portgainy views, part 1: shell, auth, activity list and transaction details. */
 
 const wordmark = (cls = '') => `<span class="wordmark ${cls}" role="img" aria-label="Portgainy"><span>Portgainy</span></span>`;
-const markImg = (size = 40, cls = '') => `<img class="mark ${cls}" src="/assets/brand/portgainy-mark.svg?v=pg1" width="${size}" height="${size}" alt="" decoding="async">`;
+const markImg = (size = 40, cls = '') => `<img class="mark ${cls}" src="/assets/brand/portgainy-mark.svg?v=pg2" width="${size}" height="${size}" alt="" decoding="async">`;
 const brandLockup = (size = 38) => `${markImg(size)}${wordmark()}`;
 
 function avatarHex(name, cls = '') {
