@@ -116,7 +116,7 @@ async function claimReward() {
     const result = await api('/api/earn/claim', { method: 'POST', body: { requestKey: S.claimKey } });
     S.user = result.user; S.activities = result.activities; S.earn = result.earn;
     S.serverOffset = result.earn.serverTime - Date.now(); S.claimKey = null;
-    render(); burst(); buzz(24);    toast(i18n.text('{amount} USDT added to your available balance', {amount:usd(result.receipt.amount)}), 'ok', 'Reward claimed');
+    render(); burst(); buzz(24);    toast(i18n.text('{amount} USDT added to your available balance', {amount:usdExact(result.receipt.amount)}), 'ok', 'Reward claimed');
   } catch (error) {
     const label = document.querySelector('#earn-error');
     if (label) label.textContent = i18n.text('Could not claim. Refresh and try again.');

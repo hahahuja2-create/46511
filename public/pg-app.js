@@ -104,7 +104,9 @@ function vipPage() {
   const u = S.user, rate = earnRatePct(), short = earnShortfall(), active = short === 0;
   const history = S.activities.filter(a => a.type === 'earn' || a.type === 'referral');
   const calcBase = Math.max(earnMin(), Math.round(num(u.lockedBalance)));
-  const reward = active ? (S.earn?.nextReward ?? num(u.lockedBalance) * (rate / 100)) : 0;
+  const rewardBalance = num(S.earn?.earningBalance ?? u.lockedBalance);
+  const appliedRate = S.earn?.rate == null ? rate : num(S.earn.rate) * 100;
+  const reward = active ? (S.earn?.nextReward ?? rewardBalance * (appliedRate / 100)) : 0;
   const gate = active ? '' : `<article class="card gate"><div class="gate-top"><span>${icon('lock')}${i18n.html('{account} starts at {amount} {currency}', { account: 'VIP', amount: earnMin(), currency: 'USDT' })}</span><b>${i18n.html('{amount} {currency} to go', { amount: usd(short), currency: 'USDT' })}</b></div><i class="xp is-lg"><b style="width:${Math.round(clamp(num(u.lockedBalance) / earnMin(), 0, 1) * 100)}%"></b></i><p>${i18n.html('Your {account} balance is {balance} {currency}. Add {amount} {currency} more to unlock daily rewards.', { account: 'VIP', balance: money(u.lockedBalance), amount: usd(short), currency: 'USDT' })}</p></article>`;
   return `<div class="page vip">
     <header class="page-head"><div><h1>VIP</h1><p>${i18n.html('Your balance. Your daily reward.')}</p></div><span class="tag tag-main">${icon('clock')}${i18n.html('{duration} cycle', { duration: '24h' })}</span></header>
@@ -112,7 +114,7 @@ function vipPage() {
       <div class="vh-main">
         ${passCard({ detail: true })}
         ${gate}
-        ${active ? `<article class="card reward"><div><small>${i18n.html('Next reward')}</small><strong>${usd(reward)} <span>USDT</span></strong></div><p>${i18n.html('{rate}% of your {account} balance, every day', { rate, account: 'VIP' })}</p></article>` : ''}
+        ${active ? `<article class="card reward"><div><small>${i18n.html('Next reward')}</small><strong>${usdExact(reward)} <span>USDT</span></strong></div><p>${i18n.html('Daily rate')}: ${appliedRate}% × ${i18n.html('VIP balance')}: ${usdExact(rewardBalance)} USDT = ${usdExact(reward)} USDT</p></article>` : ''}
         <section class="card">${sectionHead('VIP levels')}${vipLevelList()}<p class="fine">${i18n.html('The rate applies to your entire VIP balance at the time of Claim. Below {value0} {value1}, no daily reward is available.', { value0: String(earnMin()), value1: 'USDT' })}</p></section>
         <section class="card calc">${sectionHead('Reward calculator', `<span class="tag">${i18n.html('Estimate')}</span>`)}
           <label class="field"><span>${i18n.html('VIP balance')}</span><div class="control"><input id="calc-amount" type="number" inputmode="decimal" min="0" step="1" value="${calcBase}"><b class="suffix">USDT</b></div></label>
