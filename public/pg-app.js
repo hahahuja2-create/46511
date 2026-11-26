@@ -1,7 +1,7 @@
 'use strict';
 
 /*
- * Vantirena app screens: the membership pass, Home, the VIP levels page, Wallet and the Profile header.
+ * Portgainy app screens: the membership pass, Home, the VIP levels page, Wallet and the Profile header.
  * One responsive layout serves phone and desktop; the shell (sidebar / dock) lives in pg-views.js.
  */
 
@@ -55,7 +55,7 @@ function passCard({ detail = false } = {}) {
       <div><small>${i18n.html('VIP balance')}</small><b>${money(u.lockedBalance)}</b></div>
     </div>
     ${forge ? '' : `<div class="pass-cta">${claimControl()}${detail ? '<p class="form-msg" id="earn-error" role="alert"></p>' : ''}</div>`}
-    <div class="pass-foot"><span>${i18n.html('Member ID')} · ${esc(u.inviteCode)}</span><span class="pass-brand">VANTIRENA</span></div>
+    <div class="pass-foot"><span>${i18n.html('Member ID')} · ${esc(u.inviteCode)}</span><span class="pass-brand">PORTGAINY</span></div>
   </article>`;
 }
 

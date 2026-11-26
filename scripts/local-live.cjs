@@ -134,7 +134,7 @@ async function main() {
   if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('INVALID_LOCAL_PORT');
   const server = createLocalLiveServer(config);
   await new Promise((resolve, reject) => { server.once('error', reject); server.listen(port, '127.0.0.1', resolve); });
-  console.log(`Vantirena local: http://127.0.0.1:${server.address().port}`);
+  console.log(`Portgainy local: http://127.0.0.1:${server.address().port}`);
   console.log('Backend: existing Railway application. Database: existing Railway MySQL. No local database.');
   const stop = () => { server.closeAllConnections(); server.close(() => process.exit(0)); };
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
@@ -144,7 +144,7 @@ async function main() {
 function reportStartupError(error) {
   const allowed = ['RAILWAY_IDENTITY_REQUIRED', 'RAILWAY_LOCAL_REVIEW_UNAVAILABLE', 'BACKEND_REVIEW_NOT_READY', 'LOCAL_GATEWAY_ONLY', 'INVALID_LOCAL_PORT', 'EADDRINUSE'];
   const code = allowed.includes(error.code || error.message) ? error.code || error.message : 'LOCAL_BACKEND_CONNECTION_FAILED';
-  console.error('Vantirena local startup:', code); process.exitCode = 1;
+  console.error('Portgainy local startup:', code); process.exitCode = 1;
 }
 
 if (require.main === module) main().catch(reportStartupError);

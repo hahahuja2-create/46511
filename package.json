@@ -1,8 +1,8 @@
 {
-  "name": "vantirena-platform",
+  "name": "portgainy-platform",
   "version": "1.0.0",
   "private": true,
-  "description": "Vantirena VIP levels, daily rewards, referrals and USDT wallets",
+  "description": "Portgainy VIP levels, daily rewards, referrals and USDT wallets",
   "scripts": {
     "start": "node --env-file-if-exists=.env server.js",
     "dev": "node --env-file-if-exists=.env --watch server.js",
